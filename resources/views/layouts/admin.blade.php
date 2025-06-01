@@ -117,22 +117,22 @@
             <ul class="nav flex-column">
                 <li class="nav-item">
                     <a class="nav-link active" href="{{ route('admin.dashboard') }}">
-                        <i class="fas fa-home"></i><span class="ms-2">🏠 Dashboard</span>
+                        <i class="fas fa-home"></i><span class="ms-2"> Dashboard</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.balita.index') }}">
-                        <i class="fas fa-child"></i><span class="ms-2">👶 Data Balita</span>
+                        <i class="fas fa-child"></i><span class="ms-2"> Data Balita</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.jadwal-imunisasi.index') }}">
-                        <i class="fas fa-calendar-alt"></i><span class="ms-2">📅 Jadwal Imunisasi</span>
+                        <i class="fas fa-calendar-alt"></i><span class="ms-2"> Jadwal Imunisasi</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.laporan.index') }}">
-                        <i class="fas fa-file-alt"></i><span class="ms-2">📊 Laporan</span>
+                        <i class="fas fa-file-alt"></i><span class="ms-2"> Laporan</span>
                     </a>
                 </li>
             </ul>

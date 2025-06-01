@@ -37,3 +37,7 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     // Dashboard User
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
 });
+
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
+});
