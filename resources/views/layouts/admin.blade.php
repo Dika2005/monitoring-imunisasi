@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Monitoring Imunisasi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {{-- Menggunakan CSS Font Awesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" xintegrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta name="csrf-token" content="{{ csrf_token() }}"> {{-- Pastikan ini ada untuk CSRF token --}}
     <style>
         body {
             background-color: #1e293b;
             color: #f8fafc;
         }
         .sidebar {
-            height: 100vh;
+            height: 100vh; /* Memastikan sidebar mengambil tinggi penuh viewport */
             background-color: #111827;
             color: #f8fafc;
             padding-top: 20px;
@@ -21,9 +23,9 @@
             top: 0;
             left: 0;
             z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            display: flex; /* Mengaktifkan Flexbox */
+            flex-direction: column; /* Mengatur item dalam kolom vertikal */
+            justify-content: space-between; /* Mendorong item pertama ke atas, item terakhir ke bawah */
         }
         .sidebar .brand-link {
             padding: 16px;
@@ -56,6 +58,7 @@
         .sidebar .logout-section {
             padding: 16px;
             border-top: 1px solid #334155;
+            /* Flexbox akan mendorong ini ke bawah secara otomatis */
         }
         .sidebar .logout-button {
             background-color: #dc3545;
@@ -73,7 +76,7 @@
             background-color: #c82333;
         }
         .main-content {
-            margin-left: 250px;
+            margin-left: 250px; /* Memberi ruang untuk sidebar */
             padding: 20px;
         }
         .card {
@@ -113,25 +116,25 @@
 <div class="d-flex">
     <div class="sidebar p-3 d-flex flex-column justify-content-between">
         <div>
-            <a href="/" class="brand-link text-center mb-4">SIMBA</a>
+            <a href="/" class="brand-link text-center mb-4">Admin Imunisasi</a>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('admin.dashboard') }}">
+                    <a class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                         <i class="fas fa-home"></i><span class="ms-2"> Dashboard</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.balita.index') }}">
+                    <a class="nav-link {{ Request::routeIs('admin.balita.index') || Request::routeIs('admin.balita.create') || Request::routeIs('admin.balita.edit') ? 'active' : '' }}" href="{{ route('admin.balita.index') }}">
                         <i class="fas fa-child"></i><span class="ms-2"> Data Balita</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.jadwal-imunisasi.index') }}">
+                    <a class="nav-link {{ Request::routeIs('admin.jadwal-imunisasi.index') || Request::routeIs('admin.jadwal-imunisasi.create') || Request::routeIs('admin.jadwal-imunisasi.edit') ? 'active' : '' }}" href="{{ route('admin.jadwal-imunisasi.index') }}">
                         <i class="fas fa-calendar-alt"></i><span class="ms-2"> Jadwal Imunisasi</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.laporan.index') }}">
+                    <a class="nav-link {{ Request::routeIs('admin.laporan.index') ? 'active' : '' }}" href="{{ route('admin.laporan.index') }}">
                         <i class="fas fa-file-alt"></i><span class="ms-2"> Laporan</span>
                     </a>
                 </li>
@@ -153,6 +156,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" integrity="sha512-lpyL8yY9ZEbCsg+t9DvYHAyBPeYhhn5m7t+ibXb07m/tPxTs+Nf+iFz3ej5z5N5f+m9j1g9Ff5Z2JlEd+m4mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{{-- JS Font Awesome --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" crossorigin="anonymous"></script>
+
+{{-- Pastikan @stack('scripts') ada di sini untuk menyertakan skrip dari child views --}}
+@stack('scripts')
 </body>
 </html>

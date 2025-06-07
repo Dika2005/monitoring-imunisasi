@@ -17,6 +17,7 @@ class LaporanImunisasi extends Model
         'jenis_vaksin',
         'tanggal_imunisasi',
         'status',
+        
     ];
 
     // Relasi dengan model JadwalImunisasi
@@ -29,6 +30,10 @@ class LaporanImunisasi extends Model
     public function balita()
     {
         return $this->belongsTo(Balita::class, 'balita_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
 

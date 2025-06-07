@@ -4,82 +4,80 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Balita; // Pastikan ini benar!
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Redirect;
+use App\Models\Balita;
+use App\Models\User;
 
 class BalitaController extends Controller
 {
-    public function index(): View // Gunakan kelas View yang benar di sini
+    public function index()
     {
-        // Menampilkan daftar balita
-        $balitas = Balita::all(); // Ambil data balita dari database
-        return view('admin.balita.index', compact('balitas')); // Kirim data ke view
+        $balitas = Balita::with('user')->latest()->get();
+        return view('admin.balita.index', compact('balitas'));
     }
 
     public function create()
     {
-        // Menampilkan form untuk menambah data balita
-        return view('admin.balita.create');
+        $users = User::where('role', 'user')->orderBy('name')->get();
+        return view('admin.balita.create', compact('users'));
     }
 
     public function store(Request $request)
     {
-        // 1. Validasi Data (Sangat Penting)
-        $request->validate([
+        $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required|in:laki-laki,perempuan',
-            'alamat' => 'required|string',
-            // Tambahkan validasi untuk kolom lain jika ada
+            'alamat' => 'required|string|max:255',
+            'user_id' => 'required|exists:users,id',
         ]);
 
-        $balita = new Balita();
+        Balita::create([
+            'nama' => $validatedData['nama'],
+            'tanggal_lahir' => $validatedData['tanggal_lahir'],
+            'jenis_kelamin' => $validatedData['jenis_kelamin'],
+            'alamat' => $validatedData['alamat'],
+            'user_id' => $validatedData['user_id'],
+        ]);
 
-        $balita->nama = $request->input('nama');
-        $balita->tanggal_lahir = $request->input('tanggal_lahir');
-        $balita->jenis_kelamin = $request->input('jenis_kelamin');
-        $balita->alamat = $request->input('alamat');
-    
-        $balita->save();
-
-        return Redirect::route('admin.balita.index')->with('success', 'Data balita berhasil ditambahkan.');
-        
+        return redirect()->route('admin.balita.index')->with('success', 'Data balita berhasil ditambahkan.');
     }
 
-    public function edit($id)
+    public function edit(Balita $balitum)
     {
-        // Menampilkan form untuk mengedit data balita
-        $balita = Balita::findOrFail($id);  // Ambil data balita berdasarkan id
-        return view('admin.balita.edit', compact('balita')); // Kirim data balita ke view edit
+        $users = User::where('role', 'user')->orderBy('name')->get();
+        return view('admin.balita.edit', compact('balitum', 'users'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Balita $balitum)
     {
-        // Update data balita
-         $request->validate([
+        $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required|in:laki-laki,perempuan',
-            'alamat' => 'required|string',
+            'alamat' => 'required|string|max:255',
+            'user_id' => 'required|exists:users,id',
         ]);
 
-        $balita = Balita::findOrFail($id);
-        $balita->nama = $request->nama;
-        $balita->tanggal_lahir = $request->tanggal_lahir;
-        $balita->jenis_kelamin = $request->jenis_kelamin;
-        $balita->alamat = $request->alamat;
-        $balita->save();
+        $balitum->update([
+            'nama' => $validatedData['nama'],
+            'tanggal_lahir' => $validatedData['tanggal_lahir'],
+            'jenis_kelamin' => $validatedData['jenis_kelamin'],
+            'alamat' => $validatedData['alamat'],
+            'user_id' => $validatedData['user_id'],
+        ]);
 
-        return redirect()->route('admin.balita.index')->with('success', 'Data balita berhasil diupdate');
+        return redirect()->route('admin.balita.index')->with('success', 'Data balita berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    public function show(Balita $balitum)
     {
-        // Menghapus data balita
-        $balita = Balita::findOrFail($id);
-        $balita->delete();
+        $balitum->load('user');
+        return view('admin.balita.show', compact('balitum'));
+    }
 
-        return redirect()->route('admin.balita.index')->with('success', 'Data balita berhasil dihapus');
+    public function destroy(Balita $balitum)
+    {
+        $balitum->delete();
+        return redirect()->route('admin.balita.index')->with('success', 'Data balita berhasil dihapus.');
     }
 }

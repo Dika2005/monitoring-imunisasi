@@ -4,9 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\BalitaController;
 use App\Http\Controllers\Admin\JadwalImunisasiController;
-use App\Http\Controllers\Admin\LaporanImunisasiController;
+use App\Http\Controllers\Admin\LaporanImunisasiController as AdminLaporanImunisasiController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\JadwalImunisasiController as UserJadwalImunisasiController;
+use App\Http\Controllers\User\LaporanImunisasiController as UserLaporanImunisasiController;
 use App\Http\Middleware\CheckRole;
 
 // Halaman login dan register
@@ -16,28 +18,36 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Admin routes
-Route::middleware(['auth', CheckRole::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+// Admin routes dengan middleware CheckRole:admin
+Route::middleware(['auth', CheckRole::class . ':admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
-    // Data Balita Routes
-    Route::resource('balita', BalitaController::class);
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // Jadwal Imunisasi Routes
-    Route::resource('jadwal-imunisasi', JadwalImunisasiController::class);
-    Route::post('jadwal-imunisasi/{id}/selesai', [JadwalImunisasiController::class, 'selesai'])->name('jadwal-imunisasi.selesai');
+        Route::resource('balita', BalitaController::class);
 
-    // Laporan Routes
-    Route::get('laporan', [LaporanImunisasiController::class, 'index'])->name('laporan.index');
-});
+        Route::resource('jadwal-imunisasi', JadwalImunisasiController::class);
 
-// User routes
-Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
-    // Dashboard User
-    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-});
+        // Menandai jadwal sebagai selesai (method PUT)
+        Route::put('jadwal-imunisasi/{jadwalImunisasi}/selesai', [JadwalImunisasiController::class, 'selesai'])->name('jadwal-imunisasi.selesai');
 
-Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
-});
+        // Kirim notifikasi "panggil"
+        Route::post('jadwal-imunisasi/{jadwalImunisasi}/panggil', [JadwalImunisasiController::class, 'panggil'])->name('jadwal-imunisasi.panggil');
+
+        // Laporan imunisasi admin
+        Route::get('laporan', [AdminLaporanImunisasiController::class, 'index'])->name('laporan.index');
+    });
+
+// User routes dengan middleware CheckRole:user
+Route::middleware(['auth', CheckRole::class . ':user'])
+    ->prefix('user')
+    ->name('user.')
+    ->group(function () {
+        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('/dashboard/jadwal-imunisasi', [UserJadwalImunisasiController::class, 'index'])->name('jadwal-imunisasi.index');
+
+        Route::get('/laporan', [UserLaporanImunisasiController::class, 'index'])->name('laporan.index');
+    });
