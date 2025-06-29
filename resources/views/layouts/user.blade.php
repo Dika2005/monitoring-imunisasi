@@ -8,39 +8,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            background-color: #343a40; /* Dark background as in admin dashboard */
+            background-color: #343a40;
             color: #f8f9fa;
-            display: flex; /* Use flexbox for sidebar and content layout */
-            min-height: 100vh; /* Ensure full viewport height */
+            display: flex;
+            min-height: 100vh;
             margin: 0;
         }
         .sidebar {
-            width: 250px; /* Fixed width for sidebar */
-            background-color: #212529; /* Darker background for sidebar */
+            width: 250px;
+            background-color: #212529;
             padding-top: 20px;
-            flex-shrink: 0; /* Prevent sidebar from shrinking */
-            /* --- Ini adalah properti yang mendorong logout ke bawah --- */
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Mendorong item pertama ke atas, item terakhir ke bawah */
-            height: 100vh; /* Memastikan sidebar mengambil tinggi penuh viewport */
-            /* ----------------------------------------------- */
+            justify-content: space-between;
+            height: 100vh;
         }
         .sidebar .sidebar-header {
             color: #f8f9fa;
             text-align: center;
             padding-bottom: 20px;
             font-size: 1.5rem;
-            border-bottom: 1px solid #495057; /* Separator */
+            border-bottom: 1px solid #495057;
             margin-bottom: 20px;
         }
         .sidebar .sidebar-header img {
-            max-width: 150px; /* Adjust logo size as needed */
+            max-width: 150px;
             height: auto;
-            display: block; /* Ensure image takes up full width */
-            margin: 0 auto; /* Center the logo */
+            display: block;
+            margin: 0 auto;
         }
-        /* Mengubah selektor untuk ul.list-unstyled karena sekarang dibungkus div */
         .sidebar .top-content ul.list-unstyled {
             padding-left: 0;
             list-style: none;
@@ -48,46 +45,44 @@
         .sidebar ul.list-unstyled li a {
             display: block;
             padding: 10px 20px;
-            color: #adb5bd; /* Lighter text for links */
+            color: #adb5bd;
             text-decoration: none;
             transition: background-color 0.3s, color 0.3s;
         }
         .sidebar ul.list-unstyled li a:hover,
         .sidebar ul.list-unstyled li a.active {
-            background-color: #007bff; /* Highlight on hover/active */
+            background-color: #007bff;
             color: #ffffff;
         }
         .sidebar ul.list-unstyled li a i {
-            margin-right: 10px; /* Space between icon and text */
+            margin-right: 10px;
         }
         .content {
-            flex-grow: 1; /* Content takes remaining space */
+            flex-grow: 1;
             padding: 20px;
-            background-color: #343a40; /* Same as body background */
+            background-color: #343a40;
         }
         .card {
-            background-color: #212529; /* Card background */
+            background-color: #212529;
             color: #f8f9fa;
             border: 1px solid rgba(255, 255, 255, 0.125);
         }
         .card-header {
             border-bottom: 1px solid rgba(255, 255, 255, 0.125);
         }
-        /* Custom styling for the logout form/button */
         .logout-form {
-            padding: 16px 20px; /* Menyesuaikan padding agar mirip dengan admin (16px atas/bawah, 20px samping) */
-            border-top: 1px solid #334155; /* Menambahkan garis atas seperti admin */
-            /* margin-top tidak lagi diperlukan karena padding atas sudah diatur */
+            padding: 16px 20px;
+            border-top: 1px solid #334155;
         }
         .logout-form button {
-            background-color: #dc3545; /* Red for logout button */
+            background-color: #dc3545;
             color: white;
             border: none;
             width: 100%;
-            text-align: center; /* Mengubah perataan teks menjadi tengah seperti admin */
-            padding: 8px 15px; /* Menyesuaikan padding tombol seperti admin */
-            border-radius: 5px; /* Menambahkan border-radius seperti admin */
-            font-size: 0.9rem; /* Menyesuaikan ukuran font seperti admin */
+            text-align: center;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
             text-decoration: none;
             display: block;
             cursor: pointer;
@@ -98,14 +93,13 @@
             color: white;
         }
         .logout-form button i {
-            margin-right: 8px; /* Menyesuaikan margin icon seperti admin */
+            margin-right: 8px;
         }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        {{-- Pembungkus baru untuk sidebar-header dan navigasi menu --}}
         <div class="top-content">
             <div class="sidebar-header">
                 <img src="{{ asset('images/imunisasi.png') }}" alt="Logo Aplikasi Imunisasi">
@@ -122,9 +116,8 @@
                     </a>
                 </li>
                 <li>
-                    {{-- PERUBAHAN DI SINI: Link ke rute laporan user --}}
-                    <a href="{{ route('user.laporan.index') }}" class="{{ Request::routeIs('user.laporan.index') ? 'active' : '' }}">
-                        <i class="fas fa-chart-bar"></i> Laporan Imunisasi
+                    <a href="{{ route('user.riwayat.index') }}" class="{{ Request::routeIs('user.riwayat.index') ? 'active' : '' }}">
+                        <i class="fas fa-chart-bar"></i> Riwayat Imunisasi
                     </a>
                 </li>
             </ul>
@@ -144,7 +137,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    {{-- Pastikan @stack('scripts') ada di sini jika Anda menggunakannya --}}
     @stack('scripts')
 </body>
 </html>

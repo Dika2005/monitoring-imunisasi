@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Balita;         // Import model Balita
 use App\Models\JadwalImunisasi; // Import model JadwalImunisasi
-use App\Models\LaporanImunisasi; // Import model LaporanImunisasi
+use App\Models\RiwayatImunisasi; // Import model RiwayatImunisasi
 use App\Models\User;           // Import model User jika ingin menghitung total user juga
 
 class DashboardController extends Controller
@@ -19,8 +19,8 @@ class DashboardController extends Controller
         // Hitung total jadwal imunisasi
         $totalJadwal = JadwalImunisasi::count();
 
-        // Hitung total catatan/laporan imunisasi (asumsi LaporanImunisasi adalah "Catatan Record Balita")
-        $totalRecord = LaporanImunisasi::count();
+        // Hitung total catatan/laporan imunisasi (asumsi RiwayatImunisasi adalah "Catatan Record Balita")
+        $totalRecord = RiwayatImunisasi::count();
 
         // Anda bisa juga menghitung total user jika perlu
         $totalUser = User::count();

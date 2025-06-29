@@ -27,11 +27,11 @@
 
         <div class="col-md-6">
             <div class="card bg-dark text-white mb-4">
-                <div class="card-header">Laporan Imunisasi</div>
+                <div class="card-header">riwayat Imunisasi</div>
                 <div class="card-body">
-                    @if($laporan->count())
+                    @if($riwayat->count())
                         <ul class="list-group">
-                            @foreach($laporan as $item)
+                            @foreach($riwayat as $item)
                                 <li class="list-group-item bg-secondary text-white">
                                     {{ $item->nama_vaksin }} - Status: 
                                     <strong>{{ $item->status ?? 'Selesai' }}</strong>
@@ -39,7 +39,7 @@
                             @endforeach
                         </ul>
                     @else
-                        <p>Belum ada laporan imunisasi.</p>
+                        <p>Belum ada riwayat imunisasi.</p>
                     @endif
                 </div>
             </div>

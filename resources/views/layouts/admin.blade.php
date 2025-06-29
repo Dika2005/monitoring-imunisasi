@@ -2,19 +2,23 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Monitoring Imunisasi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    {{-- Menggunakan CSS Font Awesome --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" xintegrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <meta name="csrf-token" content="{{ csrf_token() }}"> {{-- Pastikan ini ada untuk CSRF token --}}
+    
+    {{-- CSS Font Awesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <meta name="csrf-token" content="{{ csrf_token() }}"> {{-- Untuk CSRF token --}}
+
     <style>
         body {
             background-color: #1e293b;
             color: #f8fafc;
         }
         .sidebar {
-            height: 100vh; /* Memastikan sidebar mengambil tinggi penuh viewport */
+            height: 100vh;
             background-color: #111827;
             color: #f8fafc;
             padding-top: 20px;
@@ -23,9 +27,9 @@
             top: 0;
             left: 0;
             z-index: 100;
-            display: flex; /* Mengaktifkan Flexbox */
-            flex-direction: column; /* Mengatur item dalam kolom vertikal */
-            justify-content: space-between; /* Mendorong item pertama ke atas, item terakhir ke bawah */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .sidebar .brand-link {
             padding: 16px;
@@ -58,7 +62,6 @@
         .sidebar .logout-section {
             padding: 16px;
             border-top: 1px solid #334155;
-            /* Flexbox akan mendorong ini ke bawah secara otomatis */
         }
         .sidebar .logout-button {
             background-color: #dc3545;
@@ -76,7 +79,7 @@
             background-color: #c82333;
         }
         .main-content {
-            margin-left: 250px; /* Memberi ruang untuk sidebar */
+            margin-left: 250px;
             padding: 20px;
         }
         .card {
@@ -134,8 +137,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ Request::routeIs('admin.laporan.index') ? 'active' : '' }}" href="{{ route('admin.laporan.index') }}">
-                        <i class="fas fa-file-alt"></i><span class="ms-2"> Laporan</span>
+                    <a class="nav-link {{ Request::routeIs('admin.riwayat.index') ? 'active' : '' }}" href="{{ route('admin.riwayat.index') }}">
+                        <i class="fas fa-file-alt"></i><span class="ms-2"> Riwayat</span>
                     </a>
                 </li>
             </ul>
@@ -156,10 +159,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-{{-- JS Font Awesome --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" crossorigin="anonymous"></script>
-
-{{-- Pastikan @stack('scripts') ada di sini untuk menyertakan skrip dari child views --}}
 @stack('scripts')
 </body>
 </html>

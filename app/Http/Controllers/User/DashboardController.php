@@ -5,7 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\JadwalImunisasi;
-use App\Models\LaporanImunisasi;
+use App\Models\RiwayatImunisasi;
 use App\Models\Balita; // <<< Tambahkan ini
 
 class DashboardController extends Controller
@@ -23,17 +23,17 @@ class DashboardController extends Controller
 
 
         $jadwal = collect(); // Inisialisasi koleksi kosong
-        $laporan = collect(); // Inisialisasi koleksi kosong
+        $riwayat = collect(); // Inisialisasi koleksi kosong
 
-        // 2. Hanya ambil jadwal dan laporan jika user memiliki balita
+        // 2. Hanya ambil jadwal dan riwayat jika user memiliki balita
         if (!empty($balitaIds)) {
             // Ambil jadwal imunisasi untuk balita-balita ini
             $jadwal = JadwalImunisasi::whereIn('balita_id', $balitaIds)->get();
 
-            // Ambil laporan imunisasi untuk balita-balita ini
-            $laporan = LaporanImunisasi::whereIn('balita_id', $balitaIds)->get();
+            // Ambil riwayat imunisasi untuk balita-balita ini
+            $riwayat = RiwayatImunisasi::whereIn('balita_id', $balitaIds)->get();
         }
 
-        return view('user.dashboard', compact('user', 'jadwal', 'laporan'));
+        return view('user.dashboard', compact('user', 'jadwal', 'riwayat'));
     }
 }

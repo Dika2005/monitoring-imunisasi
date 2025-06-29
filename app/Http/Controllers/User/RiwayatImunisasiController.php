@@ -4,11 +4,11 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\LaporanImunisasi;
-use App\Models\Balita; // Pastikan ini diimport
+use App\Models\RiwayatImunisasi;
+use App\Models\Balita;
 use Illuminate\Support\Facades\Auth;
 
-class LaporanImunisasiController extends Controller
+class RiwayatImunisasiController extends Controller
 {
     public function index()
     {
@@ -16,25 +16,24 @@ class LaporanImunisasiController extends Controller
 
         // Pastikan user sudah login
         if (!$user) {
-            return redirect()->route('login')->with('error', 'Anda harus login untuk melihat laporan imunisasi.');
+            return redirect()->route('login')->with('error', 'Anda harus login untuk melihat riwayat imunisasi.');
         }
 
         // 1. Dapatkan semua ID balita yang dimiliki oleh user yang sedang login
-        // Asumsikan relasi 'balitas' sudah didefinisikan di App\Models\User.php
         $balitaIds = $user->balitas->pluck('id')->toArray();
-        // Alternatif jika relasi di User.php belum ada:
+        // Alternatif jika relasi belum ada di model User:
         // $balitaIds = Balita::where('user_id', $user->id)->pluck('id')->toArray();
 
-        $laporans = collect(); // Inisialisasi sebagai koleksi kosong
+        $riwayats = collect(); // Inisialisasi koleksi kosong
 
-        // 2. Jika user memiliki balita, ambil laporan imunisasi untuk balita-balita tersebut
+        // 2. Ambil data riwayat imunisasi jika user punya balita
         if (!empty($balitaIds)) {
-            $laporans = LaporanImunisasi::with('balita') // Eager load relasi balita jika Anda membutuhkannya di view
+            $riwayats = RiwayatImunisasi::with('balita') // Eager load relasi balita jika dibutuhkan
                                         ->whereIn('balita_id', $balitaIds)
                                         ->orderBy('tanggal_imunisasi', 'desc')
                                         ->get();
         }
 
-        return view('user.laporan.index', compact('laporans'));
+        return view('user.riwayat.index', compact('riwayats'));
     }
 }

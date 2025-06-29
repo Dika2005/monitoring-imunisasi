@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-    <div class="container mt-4"> {{-- Tambahkan container untuk konsistensi layout --}}
+    <div class="container mt-4">
         <h2>Daftar Data Balita</h2>
 
         @if (session('success'))
@@ -18,14 +18,12 @@
             </div>
         @else
             <div class="table-responsive">
-                {{-- PERUBAHAN DI SINI: Menambahkan kelas Bootstrap untuk styling dark table --}}
                 <table class="table table-dark table-striped table-hover table-bordered">
                     <thead>
                         <tr>
                             <th>No</th>
                             <th>Nama Balita</th>
-                            <th>Tanggal Lahir</th>
-                            <th>Jenis Kelamin</th>
+                            <th>Umur</th>
                             <th>Orang Tua (User)</th>
                             <th>Alamat</th>
                             <th>Aksi</th>
@@ -36,9 +34,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $balita->nama }}</td>
-                                <td>{{ \Carbon\Carbon::parse($balita->tanggal_lahir)->translatedFormat('d F Y') }}</td>
-                                <td>{{ ucfirst($balita->jenis_kelamin) }}</td>
-                                {{-- Pastikan relasi 'user' di model Balita sudah di-eager load di controller AdminBalitaController --}}
+                                <td>{{ $balita->umur_format }}</td>
                                 <td>{{ $balita->user->name ?? 'N/A' }}</td>
                                 <td>{{ $balita->alamat }}</td>
                                 <td>
@@ -55,5 +51,5 @@
                 </table>
             </div>
         @endif
-    </div> {{-- Penutup div container --}}
+    </div>
 @endsection

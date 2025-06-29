@@ -5,19 +5,44 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\JadwalImunisasi;
-use App\Models\LaporanImunisasi;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ImunisasiNotification;
+use App\Models\RiwayatImunisasi;
 use App\Models\Balita;
+use App\Models\User;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\View\View;
+use App\Services\WablasServices;
+use Carbon\Carbon;
 
 class JadwalImunisasiController extends Controller
 {
     public function index(): View
     {
         $jadwal_imunisasi = JadwalImunisasi::with('balita.user')->get();
+
+        foreach ($jadwal_imunisasi as $jadwal) {
+            $balita = $jadwal->balita;
+
+            if ($balita && $balita->tanggal_lahir) {
+                $lahir = Carbon::parse($balita->tanggal_lahir);
+                $sekarang = Carbon::now();
+
+                $tahun = $lahir->diffInYears($sekarang);
+                $bulan = $lahir->diffInMonths($sekarang) % 12;
+                $hari = $lahir->diffInDays($sekarang->copy()->subYears($tahun)->subMonths($bulan));
+
+                $umur = '';
+                if ($tahun > 0) $umur .= "$tahun tahun ";
+                if ($bulan > 0) $umur .= "$bulan bulan ";
+                if ($tahun === 0 && $bulan === 0 && $hari > 0) $umur .= "$hari hari";
+                if (trim($umur) === '') $umur = 'Baru lahir';
+
+                $balita->umur_format = trim($umur);
+            } else {
+                $balita->umur_format = '-';
+            }
+        }
+
         return view('admin.jadwal-imunisasi.index', compact('jadwal_imunisasi'));
     }
 
@@ -77,56 +102,50 @@ class JadwalImunisasiController extends Controller
     public function selesai($id)
     {
         try {
-            $jadwal = JadwalImunisasi::findOrFail($id);
+            $jadwal = JadwalImunisasi::with('balita')->findOrFail($id);
 
-            $laporan = LaporanImunisasi::firstOrNew([
+            $riwayat = RiwayatImunisasi::firstOrNew([
                 'jadwal_imunisasi_id' => $id,
             ]);
 
-            $laporan->balita_id = $jadwal->balita_id;
-            $laporan->jenis_vaksin = $jadwal->jenis_vaksin;
-            $laporan->tanggal_imunisasi = $jadwal->tanggal_imunisasi;
-            $laporan->status = 'selesai';
-            $laporan->save();
+            $riwayat->balita_id = $jadwal->balita_id;
+            $riwayat->jenis_vaksin = $jadwal->jenis_vaksin;
+            $riwayat->tanggal_imunisasi = now();
 
-            return Redirect::route('admin.jadwal-imunisasi.index')->with('success', 'Jadwal imunisasi diselesaikan dan disimpan di laporan.');
+            $tanggal_jadwal = Carbon::parse($jadwal->tanggal_imunisasi);
+            $tanggal_sekarang = Carbon::now();
 
+            $riwayat->status = $tanggal_sekarang->gt($tanggal_jadwal) ? 'terlambat' : 'selesai';
+
+            $riwayat->save();
+
+            return Redirect::route('admin.jadwal-imunisasi.index')->with('success', 'Jadwal imunisasi diselesaikan dan disimpan ke riwayat.');
         } catch (ModelNotFoundException $e) {
             return Redirect::route('admin.jadwal-imunisasi.index')->with('error', 'Jadwal imunisasi tidak ditemukan.');
         }
     }
 
-    public function panggil(Request $request, JadwalImunisasi $jadwal_imunisasi)
+    public function panggilWhatsapp($id)
     {
-        $request->validate([
-            'nama_balita' => 'required|string',
-            'jenis_vaksin' => 'required|string',
-            'tanggal_imunisasi' => 'required|string',
-            'user_email' => 'required|email',
-        ]);
+        $jadwal = JadwalImunisasi::with('balita.user')->findOrFail($id);
+
+        $noTelepon = $jadwal->balita->no_telepon;
+        $namaBalita = $jadwal->balita->nama;
+        $jenisVaksin = $jadwal->jenis_vaksin;
+        $tanggalImunisasi = Carbon::parse($jadwal->tanggal_imunisasi)->translatedFormat('d F Y');
+
+        $pesan = "Halo, jadwal imunisasi untuk *$namaBalita* dengan vaksin *$jenisVaksin* dijadwalkan pada *$tanggalImunisasi*. Mohon hadir tepat waktu.";
 
         try {
-            Mail::to($request->user_email)->send(new ImunisasiNotification(
-                $request->nama_balita,
-                $request->jenis_vaksin,
-                $request->tanggal_imunisasi
-            ));
+            $wablas = new WablasServices();
+            $wablas->kirimPesan($noTelepon, $pesan);
 
-            \Log::info('Email notifikasi imunisasi berhasil dikirim.', [
-                'email' => $request->user_email,
-                'jadwal_id' => $jadwal_imunisasi->id
-            ]);
-
-            return response()->json(['message' => 'Notifikasi email berhasil dikirim!'], 200);
-
+            return response()->json(['message' => 'Notifikasi WhatsApp berhasil dikirim!'], 200);
         } catch (\Exception $e) {
-            \Log::error('Gagal mengirim email notifikasi imunisasi: ' . $e->getMessage(), [
-                'email' => $request->user_email,
-                'error' => $e->getTraceAsString()
-            ]);
+            \Log::error('Gagal kirim WA: ' . $e->getMessage());
 
             return response()->json([
-                'message' => 'Gagal mengirim notifikasi email.',
+                'message' => 'Gagal mengirim notifikasi WhatsApp.',
                 'error' => $e->getMessage()
             ], 500);
         }
