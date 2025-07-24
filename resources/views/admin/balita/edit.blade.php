@@ -16,50 +16,45 @@
     @endif
 
     <form action="{{ route('admin.balita.update', $balita->id) }}" method="POST">
-        @csrf
-        @method('PUT')
+    @csrf
+    @method('PUT')
 
-        <div class="mb-3">
-            <label for="nama" class="form-label">Nama Balita</label>
-            <input type="text" class="form-control" id="nama" name="nama" 
-                   value="{{ old('nama', $balita->nama) }}" required>
-        </div>
+    <div class="mb-3">
+        <label for="nama" class="form-label">Nama Balita</label>
+        <input type="text" class="form-control" id="nama" name="nama"
+            value="{{ old('nama', $balita->nama) }}" required>
+    </div>
 
-        <div class="mb-3">
-            <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
-            <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" 
-                   value="{{ old('tanggal_lahir', $balita->tanggal_lahir) }}" required>
-        </div>
+    <div class="mb-3">
+        <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+        <select name="jenis_kelamin" id="jenis_kelamin" class="form-control" required>
+            <option value="">-- Pilih Jenis Kelamin --</option>
+            <option value="Laki-laki" {{ old('jenis_kelamin', $balita->jenis_kelamin) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+            <option value="Perempuan" {{ old('jenis_kelamin', $balita->jenis_kelamin) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+        </select>
+    </div>
 
-        <div class="mb-3">
-            <label for="alamat" class="form-label">Alamat</label>
-            <textarea class="form-control" id="alamat" name="alamat" rows="2" required>{{ old('alamat', $balita->alamat) }}</textarea>
-        </div>
+    <div class="mb-3">
+        <label for="suhu_badan" class="form-label">Suhu Badan (°C)</label>
+        <input type="number" step="0.1" class="form-control" name="suhu_badan"
+            value="{{ old('suhu_badan', $balita->suhu_badan) }}" min="0" required>
+    </div>
 
-        <div class="mb-3">
-            <label for="no_telepon" class="form-label">No Telepon Orang Tua</label>
-            <input type="text" class="form-control" id="no_telepon" name="no_telepon" 
-                   value="{{ old('no_telepon', $balita->no_telepon) }}" required
-                   pattern="[0-9]+" maxlength="15" 
-                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-        </div>
+    <div class="mb-3">
+        <label for="tinggi_badan" class="form-label">Tinggi Badan (cm)</label>
+        <input type="number" class="form-control" name="tinggi_badan"
+            value="{{ old('tinggi_badan', $balita->tinggi_badan) }}" min="0" required>
+    </div>
 
-        <div class="mb-3">
-            <label for="user_id" class="form-label">Orang Tua (User)</label>
-            <select class="form-control" name="user_id" id="user_id" required>
-                <option value="" disabled>-- Pilih Orang Tua --</option>
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}" {{ $user->id == old('user_id', $balita->user_id) ? 'selected' : '' }}>
-                        {{ $user->name }} ({{ $user->email }})
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    <div class="mb-3">
+        <label for="berat_badan" class="form-label">Berat Badan (kg)</label>
+        <input type="number" step="0.1" class="form-control" name="berat_badan"
+            value="{{ old('berat_badan', $balita->berat_badan) }}" min="0" required>
+    </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Perbarui</button>
-            <a href="{{ route('admin.balita.index') }}" class="btn btn-secondary">Kembali</a>
-        </div>
-    </form>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{{ route('admin.balita.index') }}" class="btn btn-secondary">Kembali</a>
+</form>
+
 </div>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\OrangTua;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -21,51 +22,65 @@ class AuthController extends Controller
 
     // Proses login
     public function login(Request $request) {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ], [
-            'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'password.required' => 'Password wajib diisi.',
-        ]);
+    $credentials = $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+    ], [
+        'email.required' => 'Email wajib diisi.',
+        'email.email' => 'Format email tidak valid.',
+        'password.required' => 'Password wajib diisi.',
+    ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->route(Auth::user()->role . '.dashboard');
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
+        if (Auth::user()->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } else {
+            return redirect()->route('user.dashboard'); // nanti kita buat rute ini
         }
-
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->withInput();
     }
+
+    return back()->withErrors([
+        'email' => 'Email atau password salah.',
+    ])->withInput();
+}
+
 
     // Proses register
-    public function register(Request $request) {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'min:6'],
-            'role' => ['required', 'in:admin,user'],
-        ], [
-            'name.required' => 'Nama wajib diisi.',
-            'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah digunakan, silakan pakai email lain.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal 6 karakter.',
-            'role.required' => 'Role wajib dipilih.',
-        ]);
+    // Proses register
+public function register(Request $request)
+{
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'no_telepon' => 'required|string|max:20',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
 
-        User::create([
-            'name' => $request->name,
+    // Buat user baru
+    $user = User::create([
+        'name' => $request->nama,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+    ]);
+
+    // Cek apakah email sudah ada di orang tua, jika belum buat baru
+    $orangTua = OrangTua::where('email', $request->email)->first();
+    if (!$orangTua) {
+        OrangTua::create([
+            'nama' => $request->nama,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'no_telepon' => $request->no_telepon,
+            'alamat' => '-', // bisa kosong atau kamu sesuaikan
         ]);
-
-        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login.');
     }
+
+    // Login otomatis user setelah register
+    auth()->login($user);
+
+    return redirect()->route('user.dashboard')->with('success', 'Registrasi berhasil! Selamat datang.');
+}
 
     // Logout
     public function logout(Request $request) {

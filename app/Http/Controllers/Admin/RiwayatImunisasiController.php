@@ -9,89 +9,55 @@ use Carbon\Carbon;
 
 class RiwayatImunisasiController extends Controller
 {
-    public function index()
-    {
-        // Ambil data dengan relasi balita dan user
-        $riwayat_imunisasi = RiwayatImunisasi::with('balita.user')->get();
+    public function index(Request $request)
+{
+    $query = RiwayatImunisasi::with('balita.orangtua');
 
-        // Hitung umur untuk setiap balita
-        foreach ($riwayat_imunisasi as $riwayat) {
-            $balita = $riwayat->balita;
+    if ($request->filled('search')) {
+        $query->whereHas('balita', function ($q) use ($request) {
+            $q->where('nama', 'like', '%' . $request->search . '%');
+        });
+    }
 
-            if ($balita && $balita->tanggal_lahir) {
-                $lahir = Carbon::parse($balita->tanggal_lahir);
-                $sekarang = Carbon::now();
+    if ($request->filled('vaksin')) {
+        $query->where('jenis_vaksin', $request->vaksin);
+    }
 
-                $tahun = $lahir->diffInYears($sekarang);
-                $bulan = $lahir->diffInMonths($sekarang) % 12;
-                $hari = $lahir->diffInDays($sekarang->copy()->subYears($tahun)->subMonths($bulan));
+    if ($request->filled('status')) {
+    if ($request->status === 'terlambat') {
+        $query->where('status', 'like', 'terlambat%');
+    } else {
+        $query->where('status', $request->status);
+    }
+}
 
-                $umur = '';
-                if ($tahun > 0) {
-                    $umur .= "$tahun tahun ";
-                }
-                if ($bulan > 0) {
-                    $umur .= "$bulan bulan ";
-                }
-                if ($tahun === 0 && $bulan === 0 && $hari > 0) {
-                    $umur .= "$hari hari";
-                }
-                if (trim($umur) === '') {
-                    $umur = 'Baru lahir';
-                }
 
-                $balita->umur_format = trim($umur);
-            } else {
-                $balita->umur_format = '-';
-            }
+    $riwayatImunisasi = $query->latest()->get();
+
+    foreach ($riwayatImunisasi as $riwayat) {
+        $tanggalLahir = $riwayat->balita->tanggal_lahir;
+        $umur = Carbon::parse($tanggalLahir)->diff(Carbon::now());
+
+        $riwayat->umur_format = 
+            ($umur->y ? $umur->y . ' tahun ' : '') .
+            ($umur->m ? $umur->m . ' bulan ' : '') .
+            ($umur->d ? $umur->d . ' hari' : '');
+
+        // Hitung tampilan status keterlambatan
+        if ($riwayat->status === 'terlambat') {
+            $selisih = Carbon::parse($riwayat->tanggal_imunisasi)->diffInDays(Carbon::parse($riwayat->created_at));
+            $riwayat->status_format = 'terlambat ' . $selisih . ' hari';
+        } else {
+            $riwayat->status_format = 'selesai';
         }
-
-        return view('admin.riwayat.index', compact('riwayat_imunisasi'));
     }
 
-    public function create()
-    {
-        return view('admin.riwayat.create');
-    }
+    $daftar_jenis_vaksin = RiwayatImunisasi::select('jenis_vaksin')->distinct()->pluck('jenis_vaksin');
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'jadwal_imunisasi_id' => 'required|exists:jadwal_imunisasi,id',
-            'tanggal' => 'required|date',
-            'status' => 'required|string|max:255',
-        ]);
+    return view('admin.riwayat-imunisasi.index', [
+        'riwayat_imunisasi' => $riwayatImunisasi,
+        'daftar_jenis_vaksin' => $daftar_jenis_vaksin,
+    ]);
+}
 
-        RiwayatImunisasi::create($request->all());
-
-        return redirect()->route('admin.riwayat.index')->with('success', 'Riwayat imunisasi berhasil ditambahkan');
-    }
-
-    public function edit($id)
-    {
-        $riwayat = RiwayatImunisasi::findOrFail($id);
-        return view('admin.riwayat.edit', compact('riwayat'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'jadwal_imunisasi_id' => 'required|exists:jadwal_imunisasi,id',
-            'tanggal' => 'required|date',
-            'status' => 'required|string|max:255',
-        ]);
-
-        $riwayat = RiwayatImunisasi::findOrFail($id);
-        $riwayat->update($request->all());
-
-        return redirect()->route('admin.riwayat.index')->with('success', 'Riwayat imunisasi berhasil diperbarui');
-    }
-
-    public function destroy($id)
-    {
-        $riwayat = RiwayatImunisasi::findOrFail($id);
-        $riwayat->delete();
-
-        return redirect()->route('admin.riwayat.index')->with('success', 'Riwayat imunisasi berhasil dihapus');
-    }
 }

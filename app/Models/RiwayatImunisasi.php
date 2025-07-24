@@ -12,12 +12,16 @@ class RiwayatImunisasi extends Model
     protected $table = 'riwayat_imunisasi';
 
     protected $fillable = [
-        'jadwal_imunisasi_id',
-        'balita_id',
-        'jenis_vaksin',
-        'tanggal_imunisasi',
-        'status',
-    ];
+    'jadwal_imunisasi_id',
+    'balita_id',
+    'jenis_vaksin',
+    'tanggal_imunisasi',
+    'suhu_badan',
+    'berat_badan',
+    'tinggi_badan',
+    'status',
+];
+
 
     public function jadwalImunisasi()
     {

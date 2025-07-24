@@ -29,4 +29,9 @@ class User extends Authenticatable
 {
     return $this->hasMany(Balita::class);
 }
+
+public function orangtua()
+{
+    return $this->belongsTo(User::class, 'orangtua_id');
+}
 }

@@ -4,9 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Models\JadwalImunisasi;
-use App\Models\RiwayatImunisasi;
 use Carbon\Carbon;
 
 class Balita extends Model
@@ -17,22 +14,25 @@ class Balita extends Model
         'nama',
         'tanggal_lahir',
         'jenis_kelamin',
-        'alamat',
         'no_telepon',
-        'user_id',
-        
+        'orangtua_id',
+        'suhu_badan',
+        'berat_badan',
+        'tinggi_badan',
     ];
 
     /**
-     * Relasi ke User (orang tua)
+     * Konversi otomatis kolom ke tipe data yang tepat
      */
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+        'suhu_badan' => 'float',
+        'berat_badan' => 'float',
+        'tinggi_badan' => 'float',
+    ];
 
     /**
-     * Relasi ke JadwalImunisasi
+     * Relasi ke Jadwal Imunisasi
      */
     public function jadwalImunisasi()
     {
@@ -40,7 +40,15 @@ class Balita extends Model
     }
 
     /**
-     * Relasi ke RiwayatImunisasi
+     * Relasi ke Orang Tua
+     */
+    public function orangtua()
+    {
+        return $this->belongsTo(Orangtua::class, 'orangtua_id');
+    }
+
+    /**
+     * Relasi ke Riwayat Imunisasi
      */
     public function riwayatImunisasi()
     {
@@ -48,37 +56,43 @@ class Balita extends Model
     }
 
     /**
-     * Accessor untuk menghitung umur dalam format teks (tahun, bulan, hari)
+     * Accessor untuk mendapatkan umur dalam format teks
+     * Contoh output: "2 tahun 3 bulan", "5 bulan", "10 hari", "Baru lahir"
      */
     public function getUmurFormatAttribute()
-    {
-        if (!$this->tanggal_lahir) {
-            return '-';
-        }
-
-        try {
-            $lahir = Carbon::parse($this->tanggal_lahir);
-            $sekarang = Carbon::now();
-
-            $umur = $lahir->diff($sekarang);
-
-            $umurString = '';
-            if ($umur->y > 0) {
-                $umurString .= $umur->y . ' tahun ';
-            }
-            if ($umur->m > 0) {
-                $umurString .= $umur->m . ' bulan ';
-            }
-            if ($umur->y === 0 && $umur->m === 0 && $umur->d > 0) {
-                $umurString .= $umur->d . ' hari';
-            }
-            if (trim($umurString) === '') {
-                $umurString = 'Baru lahir';
-            }
-
-            return trim($umurString);
-        } catch (\Exception $e) {
-            return '-';
-        }
+{
+    if (!$this->tanggal_lahir) {
+        return '-';
     }
+
+    try {
+        $lahir = \Carbon\Carbon::parse($this->tanggal_lahir);
+        $sekarang = \Carbon\Carbon::now(); // atau pakai tanggal imunisasi jika mau
+
+        $umur = $lahir->diff($sekarang);
+
+        if ($umur->y > 0) {
+            return $umur->y . ' tahun ' . ($umur->m > 0 ? $umur->m . ' bulan' : '');
+        }
+
+        if ($umur->m > 0) {
+            return $umur->m . ' bulan';
+        }
+
+        if ($umur->d > 0) {
+            return $umur->d . ' hari';
+        }
+
+        return 'Baru lahir';
+    } catch (\Exception $e) {
+        return '-';
+    }
+}
+
+    public function getRouteKeyName()
+{
+    return 'id';
+}
+
+
 }

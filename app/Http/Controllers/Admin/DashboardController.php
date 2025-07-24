@@ -4,27 +4,51 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Balita;         // Import model Balita
-use App\Models\JadwalImunisasi; // Import model JadwalImunisasi
-use App\Models\RiwayatImunisasi; // Import model RiwayatImunisasi
-use App\Models\User;           // Import model User jika ingin menghitung total user juga
+use Carbon\Carbon;
+use App\Models\RiwayatImunisasi;
+use App\Models\Balita;
+use App\Models\JadwalImunisasi;
+
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        // Hitung total balita
-        $totalBalita = Balita::count();
+    public function dashboard()
+{
+    // Total
+    $totalBalita = Balita::count();
+    $totalJadwal = JadwalImunisasi::count();
+    $totalRiwayat = RiwayatImunisasi::count();
 
-        // Hitung total jadwal imunisasi
-        $totalJadwal = JadwalImunisasi::count();
+     $riwayat = RiwayatImunisasi::selectRaw('MONTH(created_at) as bulan, COUNT(*) as jumlah')
+        ->groupBy('bulan')
+        ->orderBy('bulan')
+        ->get();
 
-        // Hitung total catatan/laporan imunisasi (asumsi RiwayatImunisasi adalah "Catatan Record Balita")
-        $totalRecord = RiwayatImunisasi::count();
+    // Imunisasi Per Bulan
+    $bulanLabels = [];
+    $jumlahPerBulan = [];
 
-        // Anda bisa juga menghitung total user jika perlu
-        $totalUser = User::count();
-
-        return view('admin.dashboard', compact('totalBalita', 'totalJadwal', 'totalRecord', 'totalUser'));
+     for ($i = 1; $i <= 12; $i++) {
+        $bulanLabels[] = Carbon::create()->month($i)->format('F'); // Nama bulan
+        $data = $riwayat->firstWhere('bulan', $i);
+        $jumlahPerBulan[] = $data ? $data->jumlah : 0;
     }
+
+    // Status
+    $statusCounts = [
+        'selesai' => RiwayatImunisasi::where('status', 'selesai')->count(),
+        'belum imunisasi' => RiwayatImunisasi::where('status', 'belum imunisasi')->count(),
+        'terlambat' => RiwayatImunisasi::where('status', 'like', 'terlambat%')->count(),
+    ];
+
+    return view('admin.dashboard', compact(
+        'totalBalita',
+        'totalJadwal',
+        'totalRiwayat',
+        'bulanLabels',
+        'jumlahPerBulan',
+        'statusCounts'
+    ));
+}
+
 }

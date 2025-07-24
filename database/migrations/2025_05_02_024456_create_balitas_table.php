@@ -7,31 +7,32 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Jalankan migration.
      */
-    public function up(): void // Mengubah signature menjadi void
+    public function up(): void
     {
         Schema::create('balitas', function (Blueprint $table) {
             $table->id(); // Kolom ID utama
 
-            // Kolom foreign key untuk user (orang tua)
-            // Ini akan membuat kolom user_id bertipe BIGINT UNSIGNED NOT NULL
-            // dan secara otomatis menambahkan foreign key constraint ke tabel 'users'
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
-            // onDelete('cascade') berarti jika user dihapus, balita yang terkait juga akan dihapus.
-            // Anda bisa mengubahnya menjadi onDelete('set null') jika user_id diizinkan null,
-            // atau onDelete('restrict') jika tidak ingin menghapus balita saat user dihapus.
+            $table->string('nama'); // Nama balita
+            $table->date('tanggal_lahir'); // Tanggal lahir balita
+            $table->string('jenis_kelamin'); // Jenis kelamin balita
 
-            $table->string('nama');
-            $table->date('tanggal_lahir');
-            $table->string('jenis_kelamin');
-            $table->string('alamat');
-            $table->timestamps(); // created_at dan updated_at
+            // Ganti dari nama_orang_tua menjadi foreign key orangtua_id
+            $table->unsignedBigInteger('orangtua_id'); // Relasi ke tabel orangtuas
+            $table->foreign('orangtua_id')->references('id')->on('orangtuas')->onDelete('cascade');
+
+            // Tambahan kolom pertumbuhan
+            $table->float('suhu_badan')->nullable(); // dalam °C
+            $table->float('berat_badan')->nullable(); // dalam kg
+            $table->float('tinggi_badan')->nullable(); // dalam cm
+
+            $table->timestamps(); // Kolom created_at dan updated_at
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Batalkan migration.
      */
     public function down(): void
     {

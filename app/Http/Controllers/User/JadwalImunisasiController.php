@@ -3,42 +3,31 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
 use App\Models\JadwalImunisasi;
-use App\Models\Balita;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class JadwalImunisasiController extends Controller
 {
-    /**
-     * Tampilkan daftar sumber daya untuk user yang sudah terautentikasi.
-     */
-    public function index(): View
+    public function index()
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Anda harus login untuk melihat jadwal imunisasi.');
-        }
+        // Ambil jadwal imunisasi milik balita user yg sedang login
+        // Asumsi: relasi user -> balita sudah ada dan 1 user bisa punya banyak balita
+        $user = Auth::user();
+        $jadwals = JadwalImunisasi::whereHas('balita', function ($query) use ($user) {
+            $query->where('user_id', $user->id); // sesuaikan nama kolom user_id di balita
+        })->orderBy('tanggal_imunisasi', 'asc')->get();
 
-        $user = Auth::user(); // Dapatkan user yang sedang login
+        return view('user.jadwal-imunisasi.index', compact('jadwals'));
+    }
 
-        // Dapatkan semua ID balita yang terhubung dengan user ini
-        // PERBAIKAN DI SINI: Gunakan 'user_id' BUKAN 'id_orang_tua'
-        $balitaIds = Balita::where('user_id', $user->id)->pluck('id');
+    public function show($id)
+    {
+        $user = Auth::user();
+        $jadwal = JadwalImunisasi::where('id', $id)->whereHas('balita', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->firstOrFail();
 
-        // Pastikan $balitaIds bukan koleksi kosong sebelum digunakan di whereIn
-        // agar tidak menghasilkan kueri SQL yang kosong atau tidak valid.
-        $jadwal_imunisasi_user = collect(); // Inisialisasi sebagai koleksi kosong
-
-        if ($balitaIds->isNotEmpty()) { // Gunakan isNotEmpty() untuk koleksi
-            // Dapatkan jadwal imunisasi yang terkait dengan balita-balita user ini
-            // Eager load relasi 'balita' untuk menampilkan nama balita
-            $jadwal_imunisasi_user = JadwalImunisasi::with('balita')
-                                     ->whereIn('balita_id', $balitaIds)
-                                     ->orderBy('tanggal_imunisasi', 'asc') // Urutkan berdasarkan tanggal
-                                     ->get();
-        }
-
-        return view('user.jadwal-imunisasi.index', compact('jadwal_imunisasi_user'));
+        return view('user.jadwal-imunisasi.show', compact('jadwal'));
     }
 }

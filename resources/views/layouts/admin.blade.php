@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Monitoring Imunisasi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     
     {{-- CSS Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <meta name="csrf-token" content="{{ csrf_token() }}"> {{-- Untuk CSRF token --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
         body {
@@ -125,6 +126,12 @@
                     <a class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                         <i class="fas fa-home"></i><span class="ms-2"> Dashboard</span>
                     </a>
+                    <li class="nav-item">
+    <a class="nav-link {{ Request::routeIs('admin.orangtua.*') ? 'active' : '' }}" href="{{ route('admin.orangtua.index') }}">
+        <i class="fas fa-user-friends"></i><span class="ms-2"> Data Orang Tua</span>
+    </a>
+</li>
+
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ Request::routeIs('admin.balita.index') || Request::routeIs('admin.balita.create') || Request::routeIs('admin.balita.edit') ? 'active' : '' }}" href="{{ route('admin.balita.index') }}">
@@ -137,10 +144,16 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ Request::routeIs('admin.riwayat.index') ? 'active' : '' }}" href="{{ route('admin.riwayat.index') }}">
+                    <a class="nav-link {{ Request::routeIs('admin.riwayat-imunisasi.index') ? 'active' : '' }}" href="{{ route('admin.riwayat-imunisasi.index') }}">
                         <i class="fas fa-file-alt"></i><span class="ms-2"> Riwayat</span>
                     </a>
                 </li>
+                <li class="nav-item">
+    <a class="nav-link {{ Request::routeIs('admin.ketersediaan-vaksin.*') ? 'active' : '' }}" href="{{ route('admin.ketersediaan-vaksin.index') }}">
+        <i class="fas fa-syringe"></i><span class="ms-2"> Ketersediaan Vaksin</span>
+    </a>
+</li>
+
             </ul>
         </div>
         <div class="logout-section">

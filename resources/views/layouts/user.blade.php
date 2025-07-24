@@ -2,141 +2,138 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('page_title') - Aplikasi Imunisasi</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>User Dashboard - Monitoring Imunisasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {{-- CSS Font Awesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style>
         body {
-            background-color: #343a40;
-            color: #f8f9fa;
-            display: flex;
-            min-height: 100vh;
-            margin: 0;
+            background-color: #1e293b;
+            color: #f8fafc;
         }
         .sidebar {
-            width: 250px;
-            background-color: #212529;
+            height: 100vh;
+            background-color: #111827;
+            color: #f8fafc;
             padding-top: 20px;
-            flex-shrink: 0;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 100vh;
         }
-        .sidebar .sidebar-header {
-            color: #f8f9fa;
+        .sidebar .brand-link {
+            padding: 16px;
             text-align: center;
-            padding-bottom: 20px;
-            font-size: 1.5rem;
-            border-bottom: 1px solid #495057;
             margin-bottom: 20px;
-        }
-        .sidebar .sidebar-header img {
-            max-width: 150px;
-            height: auto;
             display: block;
-            margin: 0 auto;
-        }
-        .sidebar .top-content ul.list-unstyled {
-            padding-left: 0;
-            list-style: none;
-        }
-        .sidebar ul.list-unstyled li a {
-            display: block;
-            padding: 10px 20px;
-            color: #adb5bd;
+            color: #f8fafc;
             text-decoration: none;
-            transition: background-color 0.3s, color 0.3s;
+            font-size: 2rem;
         }
-        .sidebar ul.list-unstyled li a:hover,
-        .sidebar ul.list-unstyled li a.active {
-            background-color: #007bff;
-            color: #ffffff;
+        .sidebar .nav-item .nav-link {
+            padding: 12px 16px;
+            color: #cbd5e1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
         }
-        .sidebar ul.list-unstyled li a i {
-            margin-right: 10px;
+        .sidebar .nav-item .nav-link i {
+            margin-right: 8px;
+            color: #94a3b8;
         }
-        .content {
-            flex-grow: 1;
-            padding: 20px;
-            background-color: #343a40;
+        .sidebar .nav-item .nav-link span {
+            margin-left: 8px;
         }
-        .card {
-            background-color: #212529;
-            color: #f8f9fa;
-            border: 1px solid rgba(255, 255, 255, 0.125);
+        .sidebar .nav-item .nav-link:hover {
+            background-color: #1f2937;
+            color: #f8fafc;
         }
-        .card-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.125);
-        }
-        .logout-form {
-            padding: 16px 20px;
+        .sidebar .logout-section {
+            padding: 16px;
             border-top: 1px solid #334155;
         }
-        .logout-form button {
+        .sidebar .logout-button {
             background-color: #dc3545;
-            color: white;
+            color: #fff;
             border: none;
-            width: 100%;
-            text-align: center;
             padding: 8px 15px;
             border-radius: 5px;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: block;
             cursor: pointer;
-            transition: background-color 0.3s;
+            text-decoration: none;
+            font-size: 0.9rem;
+            width: 100%;
+            text-align: center;
         }
-        .logout-form button:hover {
+        .sidebar .logout-button:hover {
             background-color: #c82333;
-            color: white;
         }
-        .logout-form button i {
-            margin-right: 8px;
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .card {
+            background-color: #1c2536;
+            color: #f8fafc;
+            border: 1px solid #334155;
+        }
+        .card-header {
+            background-color: #171f2b;
+            border-bottom: 1px solid #334155;
+        }
+        .nav-link {
+            color: #cbd5e1 !important;
+        }
+        .nav-link:hover {
+            color: #f8fafc !important;
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="top-content">
-            <div class="sidebar-header">
-                <img src="{{ asset('images/imunisasi.png') }}" alt="Logo Aplikasi Imunisasi">
-            </div>
-            <ul class="list-unstyled">
-                <li>
-                    <a href="{{ route('user.dashboard') }}" class="{{ Request::routeIs('user.dashboard') ? 'active' : '' }}">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
+<div class="d-flex">
+    <div class="sidebar p-3 d-flex flex-column justify-content-between">
+        <div>
+            <a href="{{ route('user.dashboard') }}" class="brand-link">
+                <i class="fas fa-syringe"></i>
+            </a>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::routeIs('user.jadwal-imunisasi.index') ? 'active' : '' }}" href="{{ route('user.jadwal-imunisasi.index') }}">
+                        <i class="fas fa-calendar-alt"></i><span class="ms-2">Jadwal Imunisasi</span>
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('user.jadwal-imunisasi.index') }}" class="{{ Request::routeIs('user.jadwal-imunisasi.index') ? 'active' : '' }}">
-                        <i class="fas fa-calendar-alt"></i> Jadwal Imunisasi
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('user.riwayat.index') }}" class="{{ Request::routeIs('user.riwayat.index') ? 'active' : '' }}">
-                        <i class="fas fa-chart-bar"></i> Riwayat Imunisasi
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::routeIs('user.riwayat-imunisasi.index') ? 'active' : '' }}" href="{{ route('user.riwayat-imunisasi.index') }}">
+                        <i class="fas fa-file-alt"></i><span class="ms-2">Riwayat Imunisasi</span>
                     </a>
                 </li>
             </ul>
         </div>
-        <div class="logout-form">
+        <div class="logout-section">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit">
+                <button type="submit" class="logout-button">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </form>
         </div>
     </div>
 
-    <div class="content">
+    <div class="main-content container-fluid p-4">
         @yield('content')
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    @stack('scripts')
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" crossorigin="anonymous"></script>
+@stack('scripts')
 </body>
 </html>

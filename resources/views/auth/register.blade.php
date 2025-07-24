@@ -28,38 +28,37 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
-                <div class="form-group mb-3">
-                    <label for="name">Nama</label>
-                    <input type="text" name="name" id="name"
-                        class="form-control @error('name') is-invalid @enderror"
-                        value="{{ old('name') }}" required>
-                </div>
+            <form action="{{ route('register') }}" method="POST">
+    @csrf
 
-                <div class="form-group mb-3">
-                    <label for="email">Email</label>
-                    <input type="email" name="email" id="email"
-                        class="form-control @error('email') is-invalid @enderror"
-                        value="{{ old('email') }}" required>
-                </div>
+    <div class="mb-3">
+        <label for="nama" class="form-label">Nama Lengkap</label>
+        <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required class="form-control">
+    </div>
 
-                <div class="form-group mb-3">
-                    <label for="password">Password</label>
-                    <input type="password" name="password" id="password"
-                        class="form-control @error('password') is-invalid @enderror" required>
-                </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" id="email" name="email" value="{{ old('email') }}" required class="form-control">
+    </div>
 
-                <div class="form-group mb-4">
-                    <label for="role">Role</label>
-                    <select name="role" id="role" class="form-control">
-                        <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
-                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                    </select>
-                </div>
+    <div class="mb-3">
+        <label for="no_telepon" class="form-label">No Telepon</label>
+        <input type="text" id="no_telepon" name="no_telepon" value="{{ old('no_telepon') }}" required class="form-control">
+    </div>
 
-                <button class="btn btn-success w-100">Register</button>
-            </form>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password" name="password" required class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+        <input type="password" id="password_confirmation" name="password_confirmation" required class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+
         </div>
     </div>
 </div>

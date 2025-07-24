@@ -1,67 +1,83 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container mt-4">
-    <h2>Tambah Data Balita</h2>
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="w-50 bg-white text-dark p-4 rounded shadow">
+        <h2 class="text-center mb-4">Tambah Data Balita</h2>
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <strong>Terjadi kesalahan!</strong>
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <strong>Terjadi kesalahan!</strong>
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-    <form action="{{ route('admin.balita.store') }}" method="POST">
-        @csrf
+        <form action="{{ route('admin.balita.store') }}" method="POST">
+    @csrf
 
-        <div class="mb-3">
-            <label for="nama" class="form-label">Nama Balita</label>
-            <input type="text" class="form-control" id="nama" name="nama" value="{{ old('nama') }}" required>
-        </div>
+    {{-- Nama Balita --}}
+    <div class="mb-3">
+        <label for="nama" class="form-label">Nama Balita</label>
+        <input type="text" class="form-control" id="nama" name="nama" value="{{ old('nama') }}" required>
+    </div>
 
-        <div class="mb-3">
-            <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
-            <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" required>
-        </div>
+    {{-- Tanggal Lahir --}}
+    <div class="mb-3">
+        <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+        <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" required>
+    </div>
 
-        <div class="mb-3">
-            <label for="alamat" class="form-label">Alamat</label>
-            <textarea class="form-control" id="alamat" name="alamat" rows="2" required>{{ old('alamat') }}</textarea>
-        </div>
+    {{-- Jenis Kelamin --}}
+    <div class="mb-3">
+        <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+        <select class="form-select" id="jenis_kelamin" name="jenis_kelamin" required>
+            <option value="">-- Pilih Jenis Kelamin --</option>
+            <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+            <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+        </select>
+    </div>
 
-        <div class="mb-3">
-            <label for="no_telepon" class="form-label">No Telepon Orang Tua</label>
-            <input type="text" 
-                   class="form-control" 
-                   id="no_telepon" 
-                   name="no_telepon" 
-                   value="{{ old('no_telepon') }}"
-                   required 
-                   pattern="[0-9]+" 
-                   maxlength="15"
-                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-        </div>
+    {{-- Suhu badan --}}
+    <div class="mb-3">
+        <label for="suhu_badan" class="form-label">Suhu badan (°C)</label>
+        <input type="number" step="0.1" class="form-control" id="suhu_badan" name="suhu_badan" value="{{ old('suhu_badan') }}">
+    </div>
 
-        <div class="mb-3">
-            <label for="user_id" class="form-label">Orang Tua (User)</label>
-            <select class="form-control" name="user_id" id="user_id" required>
-                <option value="" disabled selected>-- Pilih Orang Tua --</option>
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                        {{ $user->name }} ({{ $user->email }})
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    {{-- Tinggi Badan --}}
+    <div class="mb-3">
+        <label for="tinggi_badan" class="form-label">Tinggi Badan (cm)</label>
+        <input type="number" step="0.1" class="form-control" id="tinggi_badan" name="tinggi_badan" value="{{ old('tinggi_badan') }}">
+    </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success">Simpan</button>
-            <a href="{{ route('admin.balita.index') }}" class="btn btn-secondary">Kembali</a>
-        </div>
-    </form>
+    {{-- Berat Badan --}}
+    <div class="mb-3">
+        <label for="berat_badan" class="form-label">Berat Badan (kg)</label>
+        <input type="number" step="0.1" class="form-control" id="berat_badan" name="berat_badan" value="{{ old('berat_badan') }}">
+    </div>
+
+    {{-- Nama Orang Tua --}}
+    <div class="mb-3">
+    <label for="orangtua_id" class="form-label">Nama Orang Tua</label>
+    <select class="form-select" id="orangtua_id" name="orangtua_id" required>
+        <option value="">-- Pilih Orang Tua --</option>
+        @foreach ($orangtuas as $orangtua)
+            <option value="{{ $orangtua->id }}" {{ old('orangtua_id') == $orangtua->id ? 'selected' : '' }}>
+                {{ $orangtua->nama }} - {{ $orangtua->no_telepon }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+    <div class="d-flex justify-content-between">
+        <a href="{{ route('admin.balita.index') }}" class="btn btn-secondary">Kembali</a>
+        <button type="submit" class="btn btn-success">Simpan</button>
+    </div>
+</form>
+
+    </div>
 </div>
 @endsection

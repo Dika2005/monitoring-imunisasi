@@ -24,4 +24,8 @@ class JadwalImunisasi extends Model
     {
         return $this->belongsTo(Balita::class, 'balita_id');
     }
+    public function riwayat()
+{
+    return $this->hasOne(RiwayatImunisasi::class, 'jadwal_imunisasi_id');
+}
 }
