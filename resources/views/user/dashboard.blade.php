@@ -1,139 +1,81 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard - Monitoring Imunisasi</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+@extends('layouts.user')
 
-    {{-- CSS Font Awesome --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+@section('content')
+<div class="container mt-4 text-white">
 
-    <style>
-        body {
-            background-color: #1e293b;
-            color: #f8fafc;
-        }
-        .sidebar {
-            height: 100vh;
-            background-color: #111827;
-            color: #f8fafc;
-            padding-top: 20px;
-            width: 250px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .sidebar .brand-link {
-            padding: 16px;
-            text-align: center;
-            margin-bottom: 20px;
-            display: block;
-            color: #f8fafc;
-            text-decoration: none;
-            font-size: 2rem;
-        }
-        .sidebar .nav-item .nav-link {
-            padding: 12px 16px;
-            color: #cbd5e1;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-        .sidebar .nav-item .nav-link i {
-            margin-right: 8px;
-            color: #94a3b8;
-        }
-        .sidebar .nav-item .nav-link span {
-            margin-left: 8px;
-        }
-        .sidebar .nav-item .nav-link:hover {
-            background-color: #1f2937;
-            color: #f8fafc;
-        }
-        .sidebar .logout-section {
-            padding: 16px;
-            border-top: 1px solid #334155;
-        }
-        .sidebar .logout-button {
-            background-color: #dc3545;
-            color: #fff;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9rem;
-            width: 100%;
-            text-align: center;
-        }
-        .sidebar .logout-button:hover {
-            background-color: #c82333;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-        }
-        .card {
-            background-color: #1c2536;
-            color: #f8fafc;
-            border: 1px solid #334155;
-        }
-        .card-header {
-            background-color: #171f2b;
-            border-bottom: 1px solid #334155;
-        }
-        .nav-link {
-            color: #cbd5e1 !important;
-        }
-        .nav-link:hover {
-            color: #f8fafc !important;
-        }
-    </style>
-</head>
-<body>
-
-<div class="d-flex">
-    <div class="sidebar p-3 d-flex flex-column justify-content-between">
-        <div>
-            <a href="{{ route('user.dashboard') }}" class="brand-link">
-                <i class="fas fa-syringe"></i>
-            </a>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link {{ Request::routeIs('user.jadwal-imunisasi.index') ? 'active' : '' }}" href="{{ route('user.jadwal-imunisasi.index') }}">
-                        <i class="fas fa-calendar-alt"></i><span class="ms-2">Jadwal Imunisasi</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ Request::routeIs('user.riwayat-imunisasi.index') ? 'active' : '' }}" href="{{ route('user.riwayat-imunisasi.index') }}">
-                        <i class="fas fa-file-alt"></i><span class="ms-2">Riwayat Imunisasi</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="logout-section">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="logout-button">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
-        </div>
+    {{-- Gambar banner landscape --}}
+    <div class="text-center mb-4">
+        <img src="{{ asset('images/banner-imunisasi.png') }}" alt="Banner Imunisasi" class="img-fluid rounded shadow" style="max-height: 250px; object-fit: cover; width: 100%;">
     </div>
 
-    <div class="main-content container-fluid p-4">
-        @yield('content')
+    {{-- Heading --}}
+    <h2 class="mb-4 text-center">Selamat Datang di Dashboard Imunisasi</h2>
+
+    {{-- Ringkasan jumlah imunisasi --}}
+   <div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card bg-success text-white shadow h-100 py-2">
+            <div class="card-body text-center">
+                <div class="h5">Sudah</div>
+                <div class="h4 fw-bold">{{ $jumlahSelesai }}</div>
+                <div class="small">Imunisasi Selesai</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card bg-warning text-dark shadow h-100 py-2">
+            <div class="card-body text-center">
+                <div class="h5">Belum</div>
+                <div class="h4 fw-bold">{{ $jumlahBelum }}</div>
+                <div class="small">Imunisasi Belum Dilakukan</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" crossorigin="anonymous"></script>
-@stack('scripts')
-</body>
-</html>
+    {{-- Tabel Jadwal Imunisasi Terdekat --}}
+    <div class="card bg-dark shadow mb-5">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Jadwal Imunisasi Terdekat</h5>
+        </div>
+        <div class="card-body p-0">
+            @if ($jadwalTerdekat->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Balita</th>
+                                <th>Jenis Imunisasi</th>
+                                <th>Tanggal Imunisasi</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($jadwalTerdekat as $item)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->balita->nama }}</td>
+                                    <td>{{ $item->jenis_imunisasi }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($item->tanggal_imunisasi)->translatedFormat('d F Y') }}</td>
+                                    <td>
+                                        @if(strtolower($item->status) === 'selesai')
+                                            <span class="badge bg-success">Selesai</span>
+                                        @else
+                                            <span class="badge bg-warning text-dark">Belum</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="p-3 text-center text-muted">
+                    <p>Tidak ada jadwal imunisasi terdekat.</p>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+@endsection

@@ -99,33 +99,45 @@
 <body>
 
 <div class="d-flex">
-    <div class="sidebar p-3 d-flex flex-column justify-content-between">
-        <div>
-            <a href="{{ route('user.dashboard') }}" class="brand-link">
-                <i class="fas fa-syringe"></i>
+    <div class="sidebar">
+    {{-- Logo / Brand --}}
+    <a href="{{ route('user.dashboard') }}" class="brand-link">
+        <i class="fas fa-syringe"></i> Monitoring
+    </a>
+
+    {{-- Navigasi --}}
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link {{ Request::routeIs('user.dashboard') ? 'active' : '' }}" href="{{ route('user.dashboard') }}">
+                <i class="fas fa-home"></i> <span class="ms-2">Dashboard</span>
             </a>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link {{ Request::routeIs('user.jadwal-imunisasi.index') ? 'active' : '' }}" href="{{ route('user.jadwal-imunisasi.index') }}">
-                        <i class="fas fa-calendar-alt"></i><span class="ms-2">Jadwal Imunisasi</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ Request::routeIs('user.riwayat-imunisasi.index') ? 'active' : '' }}" href="{{ route('user.riwayat-imunisasi.index') }}">
-                        <i class="fas fa-file-alt"></i><span class="ms-2">Riwayat Imunisasi</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="logout-section">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="logout-button">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
-        </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link {{ Request::routeIs('user.jadwal-imunisasi.index') ? 'active' : '' }}" href="{{ route('user.jadwal-imunisasi.index') }}">
+                <i class="fas fa-calendar-alt"></i> <span class="ms-2">Jadwal Imunisasi</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link {{ Request::routeIs('user.riwayat-imunisasi.index') ? 'active' : '' }}" href="{{ route('user.riwayat-imunisasi.index') }}">
+                <i class="fas fa-file-alt"></i> <span class="ms-2">Riwayat Imunisasi</span>
+            </a>
+        </li>
+    </ul>
+
+    {{-- Logout --}}
+    <div class="logout-section mt-auto">
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="logout-button mt-3">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </button>
+        </form>
     </div>
+</div>
+
+
 
     <div class="main-content container-fluid p-4">
         @yield('content')

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('jadwal_imunisasi_id');
             $table->unsignedBigInteger('balita_id');
+            $table->string('jenis_imunisasi');
             $table->string('jenis_vaksin');
             $table->date('tanggal_imunisasi')->nullable(); // diperbolehkan null
             $table->string('status'); // tanpa batasan panjang eksplisit

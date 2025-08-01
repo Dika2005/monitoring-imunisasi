@@ -23,6 +23,7 @@ class KetersediaanVaksinController extends Controller
     {
         $request->validate([
             'nama_vaksin' => 'required',
+            'jenis_imunisasi' => 'required|string',
             'stok' => 'required|integer',
         ]);
 
@@ -41,6 +42,7 @@ class KetersediaanVaksinController extends Controller
     {
         $request->validate([
             'nama_vaksin' => 'required',
+            'jenis_imunisasi' => 'required|string',
             'stok' => 'required|integer',
         ]);
 

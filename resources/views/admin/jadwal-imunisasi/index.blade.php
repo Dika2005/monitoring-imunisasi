@@ -45,16 +45,17 @@
     @if ($jadwal_imunisasi->isEmpty())
         <div class="alert alert-info">Belum ada jadwal imunisasi.</div>
     @else
-        <div class="table-responsive">
-            <table class="table table-dark table-bordered table-hover">
-                <thead>
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-dark table-bordered table-hover text-center align-middle">
+                <thead class="text-center bg-dark" style="position: sticky; top: 0; z-index: 10;">
                     <tr>
                         <th>No</th>
                         <th>Nama Balita</th>
                         <th>Tanggal Lahir</th>
-                        <th>Umur</th>
+                        <th>Umur Saat Imunisasi</th>
                         <th>No. Telepon</th>
                         <th>Nama Orang Tua</th>
+                        <th>Jenis Imunisasi</th>
                         <th>Jenis Vaksin</th>
                         <th>Tanggal Imunisasi</th>
                         <th>Aksi</th>
@@ -62,40 +63,52 @@
                 </thead>
                 <tbody>
                     @foreach ($jadwal_imunisasi as $jadwal)
-                        @php
-                            $balita = $jadwal->balita;
-                            $orangTua = $balita->orangTua;
-                        @endphp
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $balita->nama }}</td>
-                            <td>{{ \Carbon\Carbon::parse($balita->tanggal_lahir)->translatedFormat('d F Y') }}</td>
-                            <td>{{ $balita->umur_format }}</td>
-                            <td>{{ $orangTua->no_telepon ?? '-' }}</td>
-                            <td>{{ $orangTua->nama ?? '-' }}</td>
-                            <td>{{ $jadwal->jenis_vaksin }}</td>
-                            <td>{{ \Carbon\Carbon::parse($jadwal->tanggal_imunisasi)->translatedFormat('d F Y') }}</td>
-                            <td class="d-flex flex-wrap gap-1">
-                                <a href="{{ route('admin.jadwal-imunisasi.edit', $jadwal->id) }}" class="btn btn-sm btn-warning">Edit</a>
+    @php
+        $balita = $jadwal->balita;
+        $orangTua = $balita->orangTua;
+        $umurSaatImunisasi = \Carbon\Carbon::parse($balita->tanggal_lahir)
+                                ->diff(\Carbon\Carbon::parse($jadwal->tanggal_imunisasi));
 
-                                <form action="{{ route('admin.jadwal-imunisasi.destroy', $jadwal->id) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                                </form>
+        $umurFormatted = '';
+if ($umurSaatImunisasi->y > 0) {
+    $umurFormatted .= $umurSaatImunisasi->y . ' th ';
+}
+if ($umurSaatImunisasi->m > 0) {
+    $umurFormatted .= $umurSaatImunisasi->m . ' bln ';
+}
+if ($umurSaatImunisasi->d > 0) {
+    $umurFormatted .= $umurSaatImunisasi->d . ' hari';
+}
+$umurFormatted = trim($umurFormatted); // hilangkan spasi akhir
 
-                                <a href="{{ route('admin.jadwal-imunisasi.panggil', $jadwal->id) }}" class="btn btn-sm btn-info">
-                                    Panggil
-                                </a>
+    @endphp
+    <tr>
+        <td>{{ $loop->iteration }}</td>
+        <td>{{ $balita->nama }}</td>
+        <td>{{ \Carbon\Carbon::parse($balita->tanggal_lahir)->translatedFormat('d F Y') }}</td>
+        <td>{{ $umurFormatted }}</td>
+        <td>{{ $orangTua->no_telepon ?? '-' }}</td>
+        <td>{{ $orangTua->nama ?? '-' }}</td>
+        <td>{{ $jadwal->jenis_imunisasi ?? '-' }}</td>
+        <td>{{ $jadwal->jenis_vaksin }}</td>
+        <td>{{ \Carbon\Carbon::parse($jadwal->tanggal_imunisasi)->translatedFormat('d F Y') }}</td>
+        <td class="d-flex flex-wrap justify-content-center gap-1">
+            <a href="{{ route('admin.jadwal-imunisasi.edit', $jadwal->id) }}" class="btn btn-sm btn-warning">Edit</a>
+            <form action="{{ route('admin.jadwal-imunisasi.destroy', $jadwal->id) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+            </form>
+            <a href="{{ route('admin.jadwal-imunisasi.panggil', $jadwal->id) }}" class="btn btn-sm btn-info">Panggil</a>
+            <form action="{{ route('admin.jadwal-imunisasi.selesai', $jadwal->id) }}" method="POST" onsubmit="return confirm('Tandai sebagai selesai?')">
+                @csrf
+                @method('PUT')
+                <button type="submit" class="btn btn-sm btn-success">Selesai</button>
+            </form>
+        </td>
+    </tr>
+@endforeach
 
-                                <form action="{{ route('admin.jadwal-imunisasi.selesai', $jadwal->id) }}" method="POST" onsubmit="return confirm('Tandai sebagai selesai?')">
-                                    @csrf
-                                    @method('PUT')
-                                    <button type="submit" class="btn btn-sm btn-success">Selesai</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
                 </tbody>
             </table>
         </div>

@@ -14,6 +14,7 @@ class RiwayatImunisasi extends Model
     protected $fillable = [
     'jadwal_imunisasi_id',
     'balita_id',
+    'jenis_imunisasi',
     'jenis_vaksin',
     'tanggal_imunisasi',
     'suhu_badan',

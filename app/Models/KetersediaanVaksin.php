@@ -10,7 +10,7 @@ class KetersediaanVaksin extends Model
     use HasFactory;
 
     protected $table = 'ketersediaan_vaksins';
-    protected $fillable = ['nama_vaksin', 'stok',];
+    protected $fillable = ['nama_vaksin','jenis_imunisasi','stok',];
 
     public function jadwalImunisasi()
     {

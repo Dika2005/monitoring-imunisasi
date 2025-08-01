@@ -15,6 +15,7 @@ class JadwalImunisasi extends Model
         'balita_id',
         'tanggal_imunisasi',
         'jenis_vaksin',
+        'jenis_imunisasi',
     ];
 
     /**

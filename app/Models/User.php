@@ -32,6 +32,6 @@ class User extends Authenticatable
 
 public function orangtua()
 {
-    return $this->belongsTo(User::class, 'orangtua_id');
+    return $this->hasOne(Orangtua::class);
 }
 }

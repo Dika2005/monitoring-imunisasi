@@ -94,5 +94,12 @@ class Balita extends Model
     return 'id';
 }
 
+    public function user()
+{
+    return $this->orangtua ? $this->orangtua->user : null;
+}
+
+
+
 
 }

@@ -4,30 +4,44 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\JadwalImunisasi;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class JadwalImunisasiController extends Controller
 {
     public function index()
     {
-        // Ambil jadwal imunisasi milik balita user yg sedang login
-        // Asumsi: relasi user -> balita sudah ada dan 1 user bisa punya banyak balita
         $user = Auth::user();
-        $jadwals = JadwalImunisasi::whereHas('balita', function ($query) use ($user) {
-            $query->where('user_id', $user->id); // sesuaikan nama kolom user_id di balita
-        })->orderBy('tanggal_imunisasi', 'asc')->get();
+        $orangtua = $user->orangtua;
 
-        return view('user.jadwal-imunisasi.index', compact('jadwals'));
-    }
+        if (!$orangtua) {
+            return redirect()->back()->with('error', 'Data orang tua tidak ditemukan.');
+        }
 
-    public function show($id)
-    {
-        $user = Auth::user();
-        $jadwal = JadwalImunisasi::where('id', $id)->whereHas('balita', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })->firstOrFail();
+        // Ambil jadwal imunisasi yang belum dipindahkan ke riwayat
+        $jadwals = JadwalImunisasi::whereHas('balita', function ($query) use ($orangtua) {
+                $query->where('orangtua_id', $orangtua->id);
+            })
+            ->with('balita')
+            ->orderBy('tanggal_imunisasi', 'asc')
+            ->get()
+            ->map(function ($jadwal) {
+                $today = Carbon::today();
+                $tanggalImunisasi = Carbon::parse($jadwal->tanggal_imunisasi);
 
-        return view('user.jadwal-imunisasi.show', compact('jadwal'));
+                // Cek apakah sudah lewat dari tanggal
+                if ($today->gt($tanggalImunisasi)) {
+                    $selisihHari = $today->diffInDays($tanggalImunisasi);
+                    $jadwal->status = 'Belum Imunisasi (Terlambat ' . $selisihHari . ' hari)';
+                } else {
+                    $jadwal->status = 'Belum Imunisasi';
+                }
+
+                return $jadwal;
+            });
+
+        return view('user.jadwal-imunisasi.index', [
+            'jadwals' => $jadwals
+        ]);
     }
 }

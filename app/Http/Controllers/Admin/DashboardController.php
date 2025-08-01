@@ -12,29 +12,35 @@ use App\Models\JadwalImunisasi;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+   public function dashboard()
 {
+    // Bulan dan tahun sekarang
+    $bulanIni = Carbon::now()->month;
+    $tahunIni = Carbon::now()->year;
+
     // Total
     $totalBalita = Balita::count();
-    $totalJadwal = JadwalImunisasi::count();
+    $totalJadwalBulanIni = JadwalImunisasi::whereMonth('tanggal_imunisasi', $bulanIni)
+                                ->whereYear('tanggal_imunisasi', $tahunIni)
+                                ->count();
     $totalRiwayat = RiwayatImunisasi::count();
 
-     $riwayat = RiwayatImunisasi::selectRaw('MONTH(created_at) as bulan, COUNT(*) as jumlah')
+    // Riwayat per Bulan (untuk grafik/chart)
+    $riwayat = RiwayatImunisasi::selectRaw('MONTH(created_at) as bulan, COUNT(*) as jumlah')
         ->groupBy('bulan')
         ->orderBy('bulan')
         ->get();
 
-    // Imunisasi Per Bulan
     $bulanLabels = [];
     $jumlahPerBulan = [];
 
-     for ($i = 1; $i <= 12; $i++) {
-        $bulanLabels[] = Carbon::create()->month($i)->format('F'); // Nama bulan
+    for ($i = 1; $i <= 12; $i++) {
+        $bulanLabels[] = Carbon::create()->month($i)->format('F');
         $data = $riwayat->firstWhere('bulan', $i);
         $jumlahPerBulan[] = $data ? $data->jumlah : 0;
     }
 
-    // Status
+    // Status Imunisasi
     $statusCounts = [
         'selesai' => RiwayatImunisasi::where('status', 'selesai')->count(),
         'belum imunisasi' => RiwayatImunisasi::where('status', 'belum imunisasi')->count(),
@@ -43,12 +49,13 @@ class DashboardController extends Controller
 
     return view('admin.dashboard', compact(
         'totalBalita',
-        'totalJadwal',
+        'totalJadwalBulanIni',
         'totalRiwayat',
         'bulanLabels',
         'jumlahPerBulan',
         'statusCounts'
     ));
 }
+
 
 }

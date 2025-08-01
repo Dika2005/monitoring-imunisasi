@@ -1,9 +1,40 @@
 @extends('layouts.admin')
 
 @section('content')
+<style>
+    .scroll-table-container {
+        max-height: 500px; /* Sesuaikan dengan tinggi tabel riwayat */
+        overflow-y: auto;
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #212529; /* Disamakan dengan dark bg tabel lainnya */
+        z-index: 1;
+        text-align: center;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .aksi-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+</style>
+
 <div class="container mt-4">
     <div class="d-flex justify-content-between mb-3">
-        <h3>Data Balita</h3>
+        <h3 class="text-white">Data Balita</h3>
         <a href="{{ route('admin.balita.create') }}" class="btn btn-success">Tambah Balita Baru</a>
     </div>
 
@@ -34,50 +65,49 @@
     @if($balitas->isEmpty())
         <div class="alert alert-info">Belum ada data balita.</div>
     @else
-        <div class="table-responsive">
+        <div class="table-responsive scroll-table-container">
             <table class="table table-dark table-striped table-hover table-bordered">
                 <thead>
-    <tr>
-        <th>No</th>
-        <th>Nama Balita</th>
-        <th>Jenis Kelamin</th>
-        <th>Tanggal Lahir</th>
-        <th>Umur</th>
-        <th>Suhu Badan (°C)</th>
-        <th>Berat Badan (kg)</th>
-        <th>Tinggi Badan (cm)</th>
-        <th>Nama Orang Tua</th>
-        <th>No Telepon</th>
-        <th>Aksi</th>
-    </tr>
-</thead>
-
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Balita</th>
+                        <th>Jenis Kelamin</th>
+                        <th>Tanggal Lahir</th>
+                        <th>Umur</th>
+                        <th>Suhu Badan (°C)</th>
+                        <th>Berat Badan (kg)</th>
+                        <th>Tinggi Badan (cm)</th>
+                        <th>Nama Orang Tua</th>
+                        <th>No Telepon</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
                 <tbody>
-    @foreach($balitas as $balita)
-        <tr>
-            <td>{{ $loop->iteration }}</td>
-            <td>{{ $balita->nama }}</td>
-            <td>{{ $balita->jenis_kelamin }}</td>
-            <td>{{ \Carbon\Carbon::parse($balita->tanggal_lahir)->format('d-m-Y') }}</td>
-            <td>{{ $balita->umur_format }}</td>
-            <td>{{ $balita->suhu_badan ?? '-' }}</td>
-            <td>{{ $balita->berat_badan ?? '-' }}</td>
-            <td>{{ $balita->tinggi_badan ?? '-' }}</td>
-            <td>{{ $balita->orangTua->nama ?? '-' }}</td>
-            <td>{{ $balita->orangTua->no_telepon ?? '-' }}</td>
-
-            <td>
-                <a href="{{ route('admin.balita.edit', $balita->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                <form action="{{ route('admin.balita.destroy', $balita->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data balita ini?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                </form>
-            </td>
-        </tr>
-    @endforeach
-</tbody>
-
+                    @foreach($balitas as $balita)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $balita->nama }}</td>
+                        <td>{{ $balita->jenis_kelamin }}</td>
+                        <td>{{ \Carbon\Carbon::parse($balita->tanggal_lahir)->format('d-m-Y') }}</td>
+                        <td>{{ $balita->umur_format }}</td>
+                        <td>{{ $balita->suhu_badan ?? '-' }}</td>
+                        <td>{{ $balita->berat_badan ?? '-' }}</td>
+                        <td>{{ $balita->tinggi_badan ?? '-' }}</td>
+                        <td>{{ $balita->orangTua->nama ?? '-' }}</td>
+                        <td>{{ $balita->orangTua->no_telepon ?? '-' }}</td>
+                        <td>
+                            <div class="aksi-buttons">
+                                <a href="{{ route('admin.balita.edit', $balita->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <form action="{{ route('admin.balita.destroy', $balita->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data balita ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
             </table>
         </div>
     @endif

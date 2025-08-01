@@ -12,7 +12,7 @@
         <div class="card border-left-primary shadow h-100 py-2 bg-dark text-white">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Balita</div>
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Jumlah Total Balita Terdaftar</div>
                     <div class="h5 mb-0 font-weight-bold text-white">{{ $totalBalita }}</div>
                 </div>
                 <div class="icon">
@@ -25,8 +25,8 @@
         <div class="card border-left-success shadow h-100 py-2 bg-dark text-white">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Jadwal Imunisasi</div>
-                    <div class="h5 mb-0 font-weight-bold text-white">{{ $totalJadwal }}</div>
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Jadwal Imunisasi Bulan Ini</div>
+                    <div class="h5 mb-0 font-weight-bold text-white">{{ $totalJadwalBulanIni }}</div>
                 </div>
                 <div class="icon">
                     <i class="bi bi-calendar-check-fill fs-1 text-success"></i>

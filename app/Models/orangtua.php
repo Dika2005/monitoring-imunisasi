@@ -11,7 +11,7 @@ class OrangTua extends Model
 
     protected $table = 'orang_tuas';
 
-    protected $fillable = ['nama', 'email', 'no_telepon', 'password'];
+    protected $fillable = ['nama', 'email', 'no_telepon', 'password', 'user_id'];
 
     protected $hidden = ['password'];
 
@@ -20,12 +20,20 @@ class OrangTua extends Model
      * Seorang orang tua bisa punya banyak balita
      */
     public function balitas()
-    {
-        return $this->hasMany(Balita::class, 'orangtua_id');
-    }
+{
+    return $this->hasMany(Balita::class, 'orangtua_id'); // juga disesuaikan
+}
+
+
 
     public function getRouteKeyName()
     {
         return 'id';
     }
+
+    public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
 }

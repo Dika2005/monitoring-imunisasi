@@ -8,8 +8,10 @@ use App\Models\Balita;
 use App\Models\KetersediaanVaksin;
 use App\Models\RiwayatImunisasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Services\WablasServices;
 use Carbon\Carbon;
@@ -78,13 +80,14 @@ class JadwalImunisasiController extends Controller
         return view('admin.jadwal-imunisasi.create', compact('balitas', 'vaksins'));
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
 {
     DB::beginTransaction();
 
     try {
         $request->validate([
             'balita_id' => 'required|exists:balitas,id',
+            'jenis_imunisasi' => 'required|string',
             'jenis_vaksin' => 'required|string',
             'tanggal_imunisasi' => 'required|date',
         ]);
@@ -103,15 +106,31 @@ class JadwalImunisasiController extends Controller
         $vaksin->stok -= 1;
         $vaksin->save();
 
+        // Ambil data balita
+        $balita = Balita::findOrFail($request->balita_id);
+
+        // Hitung umur saat tanggal imunisasi
+        $tanggalLahir = \Carbon\Carbon::parse($balita->tanggal_lahir);
+        $tanggalImunisasi = \Carbon\Carbon::parse($request->tanggal_imunisasi);
+        $umur = $tanggalLahir->diff($tanggalImunisasi);
+
+        $umurFormat = 
+            ($umur->y ? $umur->y . ' tahun ' : '') .
+            ($umur->m ? $umur->m . ' bulan ' : '') .
+            ($umur->d ? $umur->d . ' hari' : '');
+
         // Simpan jadwal imunisasi
         JadwalImunisasi::create([
             'balita_id' => $request->balita_id,
             'jenis_vaksin' => $request->jenis_vaksin,
             'tanggal_imunisasi' => $request->tanggal_imunisasi,
+            'jenis_imunisasi' => $request->jenis_imunisasi,
         ]);
 
         DB::commit();
-        return redirect()->route('admin.jadwal-imunisasi.index')->with('success', 'Jadwal berhasil ditambahkan dan stok vaksin berkurang.');
+
+        return redirect()->route('admin.jadwal-imunisasi.index')
+            ->with('success', 'Jadwal berhasil ditambahkan. Umur balita saat imunisasi: ' . $umurFormat);
 
     } catch (\Exception $e) {
         DB::rollBack();
@@ -119,6 +138,7 @@ class JadwalImunisasiController extends Controller
         return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
     }
 }
+
 
     public function edit($id)
 {
@@ -134,6 +154,7 @@ class JadwalImunisasiController extends Controller
 {
     $request->validate([
         'balita_id' => 'required|exists:balitas,id',
+        'jenis_imunisasi' => 'required|string',
         'jenis_vaksin' => 'required|string',
         'tanggal_imunisasi' => 'required|date',
     ]);
@@ -154,6 +175,7 @@ class JadwalImunisasiController extends Controller
         'balita_id' => $request->balita_id,
         'jenis_vaksin' => $request->jenis_vaksin,
         'tanggal_imunisasi' => $request->tanggal_imunisasi,
+        'jenis_imunisasi' => $request->jenis_imunisasi,
     ]);
 
     return redirect()->route('admin.jadwal-imunisasi.index')->with('success', 'Jadwal berhasil diperbarui.');
@@ -183,69 +205,127 @@ class JadwalImunisasiController extends Controller
         $terlambat = $jadwalTanggal->diffInDays($hariIni, false);
         $status = $terlambat > 0 ? "terlambat {$terlambat} hari" : "selesai";
 
-        // Cari data di riwayat berdasarkan jadwal dan balita
+        // Cek apakah data sudah ada di riwayat
         $riwayat = RiwayatImunisasi::where('jadwal_imunisasi_id', $jadwal->id)
-                    ->where('balita_id', $balita->id)
-                    ->first();
+                        ->where('balita_id', $balita->id)
+                        ->first();
 
         if ($riwayat) {
-            // Jika sudah ada, update saja
+            // Jika sudah ada, update
             $riwayat->update([
                 'tanggal_imunisasi' => now(),
-                'status' => $status,
-                'suhu_badan' => $balita->suhu_badan,
-                'berat_badan' => $balita->berat_badan,
-                'tinggi_badan' => $balita->tinggi_badan,
+                'status'            => $status,
+                'suhu'              => $balita->suhu,
+                'berat_badan'       => $balita->berat_badan,
+                'tinggi_badan'      => $balita->tinggi_badan,
             ]);
         } else {
-            // Jika tidak ada, bisa di-skip atau dibuat baru tergantung kebutuhan
-            return redirect()->back()->with('error', 'Data riwayat belum ada. Harap tekan tombol "Panggil" terlebih dahulu.');
+            // Jika belum ada, buat baru
+            RiwayatImunisasi::create([
+                'balita_id'           => $balita->id,
+                'jadwal_imunisasi_id' => $jadwal->id,
+                'tanggal_imunisasi'   => now(),
+                'jenis_imunisasi'     => $jadwal->jenis_imunisasi,
+                'jenis_vaksin'        => $jadwal->jenis_vaksin,
+                'status'              => $status,
+                'suhu'                => $balita->suhu,
+                'berat_badan'         => $balita->berat_badan,
+                'tinggi_badan'        => $balita->tinggi_badan,
+            ]);
         }
 
-        // Setelah update riwayat, hapus dari jadwal
+        // Hapus dari jadwal
         $jadwal->delete();
 
         DB::commit();
-        return redirect()->back()->with('success', 'Status imunisasi berhasil diperbarui di riwayat.');
+        return redirect()->back()->with('success', '✅ Status imunisasi berhasil disimpan ke riwayat.');
     } catch (\Exception $e) {
         DB::rollBack();
         \Log::error("Gagal update status ke riwayat: " . $e->getMessage());
-        return redirect()->back()->with('error', 'Gagal memperbarui status imunisasi.');
+        return redirect()->back()->with('error', '❌ Gagal memperbarui status imunisasi.');
     }
 }
 
 
 
 
-    public function panggil($id)
-    {
-        $jadwal = JadwalImunisasi::with('balita')->findOrFail($id);
-        $balita = $jadwal->balita;
 
-        $hariIni = Carbon::now();
-        $jadwalTanggal = Carbon::parse($jadwal->tanggal_imunisasi);
+  public function panggil($id)
+{
+    $jadwalImunisasi = JadwalImunisasi::with('balita.orangtua')->findOrFail($id);
+    $balita = $jadwalImunisasi->balita;
+    $orangtua = $balita->orangtua;
+    $jadwalTanggal = Carbon::parse($jadwalImunisasi->tanggal_imunisasi);
+    $hariIni = Carbon::now();
 
-        $hariTerlambat = $hariIni->greaterThan($jadwalTanggal)
-            ? $hariIni->diffInDays($jadwalTanggal)
-            : 0;
+    if ($orangtua && $orangtua->no_telepon) {
+        // Format nomor WA
+        $noHp = preg_replace('/[^0-9]/', '', $orangtua->no_telepon);
+        $noWa = preg_replace('/^0/', '62', $noHp);
 
-        $status = $hariTerlambat > 0
-            ? "belum imunisasi (terlambat {$hariTerlambat} hari)"
-            : "belum imunisasi";
+        // Buat pesan
+        $pesan = "👶 *Notifikasi Imunisasi*\n\n" .
+                 "Halo Bapak/Ibu,\n\n" .
+                 "Imunisasi untuk balita *{$balita->nama}* dijadwalkan pada:\n" .
+                 "*Tanggal:* " . $jadwalTanggal->format('d-m-Y') . "\n" .
+                 "*Jenis Vaksin:* {$jadwalImunisasi->jenis_vaksin}\n\n" .
+                 "Silakan hadir di klinik sesuai jadwal.\nTerima kasih 🙏";
 
-        RiwayatImunisasi::updateOrCreate(
-    ['jadwal_imunisasi_id' => $jadwal->id],
-    [
-        'balita_id' => $jadwal->balita_id,
-        'jenis_vaksin' => $jadwal->jenis_vaksin,
-        'tanggal_imunisasi' => now(),
-        'status' => $status,
-        'suhu_badan' => $balita->suhu_badan,
-        'berat_badan' => $balita->berat_badan,
-        'tinggi_badan' => $balita->tinggi_badan,
-    ]
-        );
+        // Kirim pesan via Fonnte (gunakan token dari .env)
+        $token = env('FONNTE_TOKEN'); // Pastikan kamu sudah set ini di file .env
+        if (!$token) {
+            return back()->with('error', '❌ Token Fonnte belum diatur di file .env.');
+        }
 
-        return redirect()->route('admin.jadwal-imunisasi.index')->with('success', 'Panggilan berhasil diproses dan data disimpan ke riwayat.');
+        $response = Http::withHeaders([
+            'Authorization' => $token
+        ])->asForm()->post('https://api.fonnte.com/send', [
+            'target' => $noWa,
+            'message' => $pesan,
+            'countryCode' => '62', // optional jika sudah format 62
+        ]);
+
+        Log::info('📤 Fonnte Response:', $response->json());
+
+        if (isset($response['status']) && $response['status'] === true) {
+            // Status imunisasi
+            $status = 'belum imunisasi';
+           if ($hariIni->startOfDay()->gt($jadwalTanggal->startOfDay())) {
+    $terlambat = (int) $hariIni->startOfDay()->diffInDays($jadwalTanggal->startOfDay());
+    $status = "belum imunisasi (terlambat {$terlambat} hari)";
+}
+
+
+            // Cegah duplikat
+            $sudahAda = RiwayatImunisasi::where('jadwal_imunisasi_id', $jadwalImunisasi->id)->exists();
+
+            if (! $sudahAda) {
+                RiwayatImunisasi::create([
+                    'balita_id'           => $balita->id,
+                    'jadwal_imunisasi_id' => $jadwalImunisasi->id,
+                    'tanggal_imunisasi'   => $jadwalImunisasi->tanggal_imunisasi,
+                    'jenis_imunisasi'     => $jadwalImunisasi->jenis_imunisasi,                   
+                    'jenis_vaksin'        => $jadwalImunisasi->jenis_vaksin,
+                    'status'              => $status,
+                    'suhu'                => $balita->suhu,
+                    'tinggi_badan'        => $balita->tinggi_badan,
+                    'berat_badan'         => $balita->berat_badan,
+                ]);
+            }
+
+            return redirect()->route('admin.jadwal-imunisasi.index')
+                ->with('success', '✅ Notifikasi Fonnte berhasil dikirim & data disalin ke riwayat imunisasi.');
+        } else {
+            return back()->with('error', '❌ Gagal mengirim notifikasi via Fonnte. Cek token dan saldo akun Fonnte.');
+        }
     }
+
+    return back()->with('error', '❌ Nomor telepon orang tua tidak tersedia atau tidak valid.');
+}
+
+
+
+
+
+
 }

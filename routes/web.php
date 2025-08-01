@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 // Admin Controllers
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrangTuaController;
-use App\Http\Controllers\Admin\BalitaController;
+use App\Http\Controllers\Admin\BalitaController as AdminBalitaController;
 use App\Http\Controllers\Admin\JadwalImunisasiController as AdminJadwalController;
 use App\Http\Controllers\Admin\RiwayatImunisasiController as AdminRiwayatController;
 use App\Http\Controllers\Admin\KetersediaanVaksinController;
@@ -43,13 +43,12 @@ Route::middleware(['auth'])
     ->name('admin.')
     ->group(function () {
 
-        // ✅ Gunakan alias AdminDashboardController
         Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])->name('dashboard');
 
         Route::resource('orangtua', OrangTuaController::class);
-        Route::resource('balita', BalitaController::class)->parameters([
-    'balita' => 'balita'
-]);
+        Route::resource('balita', AdminBalitaController::class)->parameters([
+            'balita' => 'balita'
+        ]);
 
         Route::resource('jadwal-imunisasi', AdminJadwalController::class);
 
@@ -62,9 +61,7 @@ Route::middleware(['auth'])
         Route::post('jadwal-imunisasi/{jadwalImunisasi}/panggil-wa', [AdminJadwalController::class, 'panggilWhatsapp'])
             ->name('jadwal-imunisasi.panggil-wa');
 
-        // ✅ Riwayat Imunisasi (pakai alias)
         Route::resource('riwayat-imunisasi', AdminRiwayatController::class);
-
         Route::resource('ketersediaan-vaksin', KetersediaanVaksinController::class);
     });
 
@@ -79,6 +76,15 @@ Route::middleware(['auth'])
     ->group(function () {
 
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+
+        // Data balita untuk user dihapus, maka route berikut tidak lagi digunakan:
+        // Route::get('balita', [UserBalitaController::class, 'index'])->name('balita.index');
+
         Route::resource('jadwal-imunisasi', UserJadwalController::class)->only(['index', 'show']);
         Route::get('riwayat-imunisasi', [UserRiwayatController::class, 'index'])->name('riwayat-imunisasi.index');
     });
+
+Route::get('/admin/riwayat-imunisasi/{id}/surat', [AdminRiwayatController::class, 'cetakSurat'])->name('admin.riwayat-imunisasi.surat');
+
+
+

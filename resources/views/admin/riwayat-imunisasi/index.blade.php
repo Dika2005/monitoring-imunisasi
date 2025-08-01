@@ -32,58 +32,65 @@
         </div>
     </form>
 
-    <div class="table-responsive">
-        <table class="table table-dark table-striped table-hover table-bordered">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Nama Balita</th>
-                    <th>Umur</th>
-                    <th>Nama Orang Tua</th>
-                    <th>No. Telepon</th>
-                    <th>Suhu (°C)</th>
-                    <th>Tinggi (cm)</th>
-                    <th>Berat (kg)</th>
-                    <th>Tanggal Imunisasi</th>
-                    <th>Jenis Vaksin</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($riwayat_imunisasi as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->balita->nama }}</td>
-                        <td>{{ $item->umur_format }}</td>
-                        <td>{{ optional($item->balita->orangtua)->nama ?? '-' }}</td>
-                        <td>{{ optional($item->balita->orangtua)->no_telepon ?? '-' }}</td>
-                        <td>{{ $item->balita->suhu_badan ? $item->balita->suhu_badan . ' °C' : '-' }}</td>
-                        <td>{{ $item->balita->tinggi_badan ? $item->balita->tinggi_badan . ' cm' : '-' }}</td>
-                        <td>{{ $item->balita->berat_badan ? $item->balita->berat_badan . ' kg' : '-' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($item->tanggal_imunisasi)->translatedFormat('d F Y') }}</td>
-                        <td>{{ $item->jenis_vaksin }}</td>
-                        <td>
-                            @php
-                                $status = strtolower($item->status);
-                            @endphp
+    <div class="table-responsive" style="max-height: 500px; overflow-y: auto; position: relative;">
+        <table class="table table-dark table-striped table-hover table-bordered text-center align-middle mb-0">
+            <thead style="position: sticky; top: 0; z-index: 1050; background-color: #212529;">
+    <tr>
+        <th>No</th>
+        <th>Nama Balita</th>
+        <th>Umur</th>
+        <th>Nama Orang Tua</th>
+        <th>No. Telepon</th>
+        <th>Suhu (°C)</th>
+        <th>Tinggi (cm)</th>
+        <th>Berat (kg)</th>
+        <th>Tanggal Imunisasi</th>
+        <th>Jenis Imunisasi</th>
+        <th>Jenis Vaksin</th>
+        <th>Status</th>
+        <th>Aksi</th> <!-- Tambahan kolom aksi -->
+    </tr>
+</thead>
+<tbody>
+    @forelse ($riwayat_imunisasi as $item)
+        <tr>
+            <td>{{ $loop->iteration }}</td>
+            <td>{{ $item->balita->nama }}</td>
+            <td>{{ $item->umur_format }}</td>
+            <td>{{ optional($item->balita->orangtua)->nama ?? '-' }}</td>
+            <td>{{ optional($item->balita->orangtua)->no_telepon ?? '-' }}</td>
+            <td>{{ $item->balita->suhu_badan ? $item->balita->suhu_badan . ' °C' : '-' }}</td>
+            <td>{{ $item->balita->tinggi_badan ? $item->balita->tinggi_badan . ' cm' : '-' }}</td>
+            <td>{{ $item->balita->berat_badan ? $item->balita->berat_badan . ' kg' : '-' }}</td>
+            <td>{{ \Carbon\Carbon::parse($item->tanggal_imunisasi)->translatedFormat('d F Y') }}</td>
+            <td>{{ $item->jenis_imunisasi }}</td>
+            <td>{{ $item->jenis_vaksin }}</td>
+            <td>
+                @php $status = strtolower($item->status); @endphp
+                @if (str_contains($status, 'terlambat'))
+                    <span class="badge bg-warning text-dark">{{ ucfirst($status) }}</span>
+                @elseif ($status == 'selesai')
+                    <span class="badge bg-success">{{ ucfirst($status) }}</span>
+                @elseif ($status == 'belum imunisasi')
+                    <span class="badge bg-danger">{{ ucfirst($status) }}</span>
+                @else
+                    <span class="badge bg-secondary">{{ ucfirst($status) }}</span>
+                @endif
+            </td>
+            <td>
+    <a href="{{ route('admin.riwayat-imunisasi.surat', $item->id) }}" class="btn btn-sm btn-primary" target="_blank">
+        <i class="bi bi-printer"></i> Cetak
+    </a>
+</td>
 
-                            @if (str_contains($status, 'terlambat'))
-                                <span class="badge bg-warning text-dark">{{ ucfirst($status) }}</span>
-                            @elseif ($status == 'selesai')
-                                <span class="badge bg-success">{{ ucfirst($status) }}</span>
-                            @elseif ($status == 'belum imunisasi')
-                                <span class="badge bg-danger">{{ ucfirst($status) }}</span>
-                            @else
-                                <span class="badge bg-secondary">{{ ucfirst($status) }}</span>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="11" class="text-center">Tidak ada data riwayat imunisasi</td>
-                    </tr>
-                @endforelse
-            </tbody>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="13" class="text-center">Tidak ada data riwayat imunisasi</td>
+        </tr>
+    @endforelse
+</tbody>
+
         </table>
     </div>
 </div>
